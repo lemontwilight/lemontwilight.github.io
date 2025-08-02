@@ -7,157 +7,241 @@
   <style>
     :root {
       --header-height: 60px;
-      --nav-height: 40px;
       --max-width: 900px;
-    --bg-image: url('http://res.cloudinary.com/dwsdvc5sd/image/upload/colorlemons.png');
-      --header-bg: rgba(255, 255, 255, 0.85);
-      --nav-bg: rgba(255, 255, 255, 0.9);
+      --bg-image: url('http://res.cloudinary.com/dwsdvc5sd/image/upload/colorlemons.png');
       --text-color: #333;
-      --link-color: #0066cc;
+      --accent: #DA3B81;
+      --tab-bg: #fff;
+      --tab-active-bg: #f8f8f8;
+      --tab-border: #ddd;
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0; padding: 0;
-    }
+    /* Reset & box-sizing */
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
 
     body {
       font-family: Arial, sans-serif;
       line-height: 1.5;
       color: var(--text-color);
+      margin: 20px;
       position: relative;
       background: none;
-      z-index: 0;
-      margin: 20px;
-      font-color: #DA3B81;
-
     }
 
-    /* Logo */
-    .logosmall {
-      width: 250px;     /* tweak to fit comfortably in 60px header */
-      height: auto;
-      display: block;
-      margin: 20px;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      width: 100%;
-      height: 60pt;
-
-      /* center its contents */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-
-    }
-
-    header {
-      text-align: center;
-      margin-bottom:30px;
-      background: ;
-    }
-    header h1 {
-      display: inline-block;
-      margin: 0;
-
-    }
-
-
-
-    /* Navigation */
-    nav {
-      display: table;                 /* shrink-to-fit like a table */
-      margin: 0.5rem auto;
-      background: var(--nav-bg);
-      padding: 0.2rem 1rem;
-      border-radius: 8px;
-      position: sticky;
-      top: var(--header-height);
-      z-index: 9;
-    }
-    nav ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-    }
-    nav li { margin: 0 1rem; }
-    nav a {
-      text-decoration: none;
-      color: #DA3B81;
-      font-weight: bold;
-    }
-    nav a:hover { color:#024CBA; }
-
-    /* Main Content */
-    main {
-      max-width: var(--max-width);
-      margin: 2rem auto;
-      padding: 0 1rem;
-      background: rgba(255,255,255,100);
-      border-radius: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-
-    }
-    section { margin-bottom: 2rem; }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      padding: 1rem 0;
-      color: #555;
-    }
-
-    /* Tiled background with opacity */
+    /* Tiled background */
     body::before {
       content: "";
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: var(--bg-image) center/500px 500px repeat;
-      opacity: 0.9;
+      inset: 0;
+      background: var(--bg-image) center/500px repeat;
+      opacity: 0.95;
       z-index: -1;
     }
+
+    header {
+      position: sticky; top: 0; height: var(--header-height);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:1rem;
+    }
+    .logosmall { max-width:250px; height:auto; }
+
+    nav {
+      display: table; margin: 0 auto 1rem;
+      background: #fff; padding:0.5rem 1rem; border-radius:8px;
+      position:sticky; top:var(--header-height); z-index:1;
+    }
+    nav ul { list-style:none; display:flex; gap:1rem; }
+    nav a { text-decoration:none; color:var(--accent); font-weight:bold; }
+    nav a:hover { color:#024CBA; }
+
+    /* --- TABS --- */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--tab-border);
+      max-width: var(--max-width);
+      margin: 0 auto 1rem;
+
+    }
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      background: var(--tab-bg);
+      border: 1px solid var(--tab-border);
+      border-bottom: none;
+      margin-right: 0.25rem;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      font-weight: bold;
+    }
+    .tab.active {
+      background: var(--tab-active-bg);
+    }
+    .tab-content {
+      display: none;
+      max-width: var(--max-width);
+      margin: 0 auto 2rem;
+      background: #fff;
+      padding: 1rem;
+      border: 0px solid var(--tab-border);
+      border-radius: 0 4px 4px 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1rem;
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .row { display: flex; gap:1rem; }
+    .column { flex:1; padding:10px; border-radius:8px; background:#fff; }
+    .avatarme { display:block; margin:0 auto; max-width:100%; height:auto; }
+
+    footer {
+      text-align:center; font-size:0.9rem; margin-top:2rem; color:#555;
+    }
+
+    @media print {
+      /* Hide everything by default */
+      body * {
+        visibility: hidden;
+      }
+
+      /* Only show the active tab content */
+      .tab-content.active, .tab-content.active * {
+        visibility: visible;
+      }
+
+      /* Ensure it starts from top of the page */
+      .tab-content.active {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+
+      /* Optional: remove page margins */
+      @page {
+        margin: 0;
+      }
+    }
+
+}
+
   </style>
 </head>
 <body>
 
   <header>
-    <h1>
-      <img src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1750194264/lemontwilightlogo.png"
-           class="logosmall"
-           alt="Lemon Twilight logo">
-    </h1>
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1750194264/lemontwilightlogo.png"
+      class="logosmall"
+      alt="Lemon Twilight logo">
   </header>
 
-  <nav>
-    <ul>
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Funko</a></li>
-      <li><a href="#">AC-NH</a></li>
-      <li><a href="#">Projects</a></li>
-      <li><a href="#">Contact</a></li>
-    </ul>
-  </nav>
-
-  <main>
-    <section id="intro">
-      <h2 style=color:#DA3B81;>Welcome to the most random site!</h2>
-      <p>I wanted to share the things I have made based on my wide variety of hobbies and experiences.  I hope you enjoy browsing the crazy parts of my brain.<br>
-      <br>I collected and put together everything on this site and spent alot of time researching. Be kind and spread love.</p>
-
-    </section>
 
 
-  </main>
+  <!-- TABS NAVIGATION -->
+  <div class="tabs">
+    <div class="tab active" data-tab="home">Home</div>
+    <div class="tab" data-tab="funko">Funko</div>
+    <div class="tab" data-tab="acnh">AC-NH</div>
+    <div class="tab" data-tab="projects">Projects</div>
+    <div class="tab" data-tab="contact">Contact</div>
+  </div>
+
+  <!-- TABS CONTENT PANES -->
+  <div id="home" class="tab-content active">
+    <h2 style="color:var(--accent);">Welcome to the most random site!</h2>
+    <div class="row">
+      <div class="column" style="font-size:15pt;">
+        <img
+          src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1751426180/rgfunkoheartsoutline_a8vzgd.png"
+          class="avatarme"
+          alt="Lemon Twilight avatar">
+      </div>
+      <div class="column" id="intro" style="font-size:15pt; color:#ff70a6;">
+        <p>
+          I wanted to share the things I have made based on my wide variety of hobbies and experiences.
+          I hope you enjoy browsing the crazy parts of my brain.
+        </p>
+        <p style="margin-top:1rem;">
+          I collected and put together everything on this site and spent a lot of time researching.
+          Be kind and spread love.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+	<!-- FUNKO TAB DATA-->
+
+  <div id="funko" class="tab-content">
+    <!-- Your Funko section markup here -->
+    <img
+      src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026797/HPpage1.png"
+      class="avatarme"
+      alt="checklist1">
+      <img
+        src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage2.png"
+        class="avatarme"
+        alt="checklist2">
+        <img
+          src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026793/HPpage3.png"
+          class="avatarme"
+          alt="checklist3">
+          <img
+            src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026800/HPpage4.png"
+            class="avatarme"
+            alt="checklist4">
+            <img
+              src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026804/HPpage5.png"
+              class="avatarme"
+              alt="checklist5">
+
+  </div>
+
+  <div id="acnh" class="tab-content">
+    <!-- Your AC-NH section markup here -->
+<p>test</po>
+    <div id="acnh" class="tab-content">
+  <iframe src="only.html" width="100%" height="1800" frameborder="0" style="border:none;"></iframe>
+</div>
+
+  </div>
+
+  <div id="projects" class="tab-content">
+    <!-- Your Projects section markup here -->
+    <h2>Other Projects</h2>
+    <p>Things I’m working on…</p>
+  </div>
+
+  <div id="contact" class="tab-content">
+    <!-- Your Contact section markup here -->
+    <h2>Contact Me</h2>
+
+  </div>
 
   <footer>
     &copy; 2025 Lemon Twilight
   </footer>
 
+  <script>
+    // Tab functionality
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // deactivate all tabs + contents
+        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+        // activate clicked tab + corresponding pane
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
