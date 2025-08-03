@@ -102,6 +102,10 @@
     .column { flex:1; padding:10px; border-radius:8px; background:#fff; }
     .avatarme { display:block; margin:0 auto; max-width:100%; height:auto; }
 
+    /* Hide print-only by default, show screen-only */
+    .print-only {
+      display: none;
+    }
     footer {
       text-align:center; font-size:0.9rem; margin-top:2rem; color:#555;
     }
@@ -124,6 +128,13 @@
         left: 0;
         width: 100%;
       }
+      .screen-only {
+  display: none !important;
+}
+.print-only {
+  display: block !important;
+}
+}
 
       /* Optional: remove page margins */
       @page {
@@ -183,33 +194,67 @@
 
   <div id="funko" class="tab-content">
     <!-- Your Funko section markup here -->
+    <!-- IMAGE: 1 On-screen image -->
     <img
-      src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026797/HPpage1.png"
+      src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage1.png"
       class="avatarme"
       alt="checklist1">
+
+      <!-- IMAGE: 2 On-screen image -->
       <img
         src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage2.png"
-        class="avatarme"
+        class="avatarme screen-only"
         alt="checklist2">
+        <!-- Print-only image -->
         <img
-          src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026793/HPpage3.png"
-          class="avatarme"
+          src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage2lg.png"
+          class="avatarme print-only"
+          alt="checklist2">
+        <!-- IMAGE: 3 On-screen image -->
+        <img
+          src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage3.png"
+          class="avatarme screen-only"
           alt="checklist3">
+          <!-- Print-only image -->
           <img
-            src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026800/HPpage4.png"
-            class="avatarme"
+            src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage3lg.png"
+            class="avatarme print-only"
+            alt="checklist3">
+
+            <!-- IMAGE: 4 On-screen image -->
+          <img
+            src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage4.png"
+            class="avatarme screen-only"
             alt="checklist4">
             <img
-              src="http://res.cloudinary.com/dwsdvc5sd/image/upload/v1754026804/HPpage5.png"
-              class="avatarme"
+            <!-- Print-only image -->
+            <img
+            src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage4lg.png"
+            class="avatarme print-only"
+            alt="checklist4">
+
+
+            <!-- IMAGE: 5 On-screen image -->
+            <img
+              src="http://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage5.png"
+              class="avatarme screen-only"
               alt="checklist5">
+
+            <!-- Print-only image -->
+            <img
+              src="http://res.cloudinary.com/dwsdvc5sd/image/upload/hppage5lg.png"
+              class="avatarme print-only"
+              alt="checklist5 (print)">
+
 
   </div>
 
   <div id="acnh" class="tab-content">
     <!-- Your AC-NH section markup here -->
 <p>test</po>
-<iframe src="/lemon-twilight/only.html" width="100%" height="1800" frameborder="0" style="border:none;"></iframe>
+  <div id="acnh" class="tab-content">
+    <iframe src="only.html" width="100%" height="1800" frameborder="0" style="border:none;"></iframe>
+  </div>
 
   </div>
 
