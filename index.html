@@ -5,60 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lemon Twilight</title>
 
-  <!-- 1. Preconnect & preload the bg tile -->
+  <!-- Preconnect + preload higher-quality tile -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link rel="preload"
-        href="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_200/colorlemons.webp"
+        href="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto:good,w_400/colorlemons.webp"
         as="image" type="image/webp">
 
-  <!-- 2. Inline critical CSS for header + tabs -->
   <style>
+
     :root {
       --header-height: 60px;
+      --max-width: 900px;
+      /* bumped from w_200 → w_400 and q_auto → q_auto:good for more detail */
+      --bg-image: url('https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto:good,w_400/colorlemons.webp');
+      --text-color: #333;
       --accent: #DA3B81;
+      --tab-bg: #fff;
+      --tab-active-bg: #f8f8f8;
       --tab-border: #ddd;
     }
+
+    /* Reset & box-sizing */
     *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
     body {
-      margin: 20px;
       font-family: Arial, sans-serif;
-      color: #333;
+      line-height: 1.5;
+      color: var(--text-color);
+      margin: 20px;
       position: relative;
+      background: none;
     }
+
+    /* Tiled background */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: var(--bg-image) center/500px repeat;
+      opacity: 0.95;
+      z-index: -1;
+    }
+
     header {
-      position: sticky;
-      top: 0;
-      height: var(--header-height);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
+      position: sticky; top: 0; height: var(--header-height);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:1rem;
     }
+    .logosmall { max-width:250px; height:auto; }
+
+    nav {
+      display: table; margin: 0 auto 1rem;
+      background: #fff; padding:0.5rem 1rem; border-radius:8px;
+      position:sticky; top:var(--header-height); z-index:1;
+    }
+    nav ul { list-style:none; display:flex; gap:1rem; }
+    nav a { text-decoration:none; color:var(--accent); font-weight:bold; }
+    nav a:hover { color:#024CBA; }
+
+    /* --- TABS --- */
     .tabs {
       display: flex;
       border-bottom: 2px solid var(--tab-border);
-      max-width: 900px;
+      max-width: var(--max-width);
       margin: 0 auto 1rem;
     }
     .tab {
-      padding: .75rem 1.5rem;
+      padding: 0.75rem 1.5rem;
       cursor: pointer;
-      font-weight: bold;
+      background: var(--tab-bg);
       border: 1px solid var(--tab-border);
       border-bottom: none;
+      margin-right: 0.25rem;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      font-weight: bold;
     }
-    .tab.active { background: #f8f8f8; }
+    .tab.active {
+      background: var(--tab-active-bg);
+    }
+    .tab-content {
+      display: none;
+      max-width: var(--max-width);
+      margin: 0 auto 2rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 0 4px 4px 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1rem;
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .row { display: flex; gap:1rem; }
+    .column { flex:1; padding:10px; border-radius:8px; background:#fff; }
+    .avatarme { display:block; margin:0 auto; max-width:100%; height:auto; }
+
+    .funko-img {
+      display: block;
+      width: 100%;
+      max-width: 900px;
+      min-width: 700px;
+      margin: 1rem auto;
+      height: auto;
+      object-fit: contain;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    /* Hide print-only by default, show screen-only */
+    .print-only { display: none; }
+    .screen-only { display: block; }
+
+    @media print {
+      body * { visibility: hidden; }
+      .tab-content.active, .tab-content.active * { visibility: visible; }
+      .tab-content.active {
+        position: absolute;
+        top: 0; left: 0; width: 100%;
+      }
+      .screen-only { display: none !important; }
+      .print-only { display: block !important; }
+      @page { margin: 0; }
+    }
+
+    footer {
+      text-align:center; font-size:0.9rem; margin-top:2rem; color:#555;
+    }
   </style>
-
-  <!-- 3. Defer full CSS -->
-  <link rel="preload" href="/css/styles.min.css" as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-  <noscript>
-    <link rel="stylesheet" href="/css/styles.min.css">
-  </noscript>
 </head>
-
 <body>
+
   <header>
     <img
       src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
@@ -68,18 +154,18 @@
       alt="Lemon Twilight logo">
   </header>
 
-  <!-- TABS NAV -->
+  <!-- TABS NAVIGATION -->
   <div class="tabs">
-    <div class="tab active"  data-tab="home">Home</div>
-    <div class="tab"         data-tab="funko">Funko</div>
-    <div class="tab"         data-tab="acnh">AC-NH</div>
-    <div class="tab"         data-tab="projects">Projects</div>
-    <div class="tab"         data-tab="contact">Contact</div>
+    <div class="tab active" data-tab="home">Home</div>
+    <div class="tab" data-tab="funko">Funko</div>
+    <div class="tab" data-tab="acnh">AC-NH</div>
+    <div class="tab" data-tab="projects">Projects</div>
+    <div class="tab" data-tab="contact">Contact</div>
   </div>
 
-  <!-- HOME CONTENT -->
+  <!-- HOME TAB CONTENT -->
   <div id="home" class="tab-content active">
-    <h2 style="color:var(--accent)">Welcome to the most random site!</h2>
+    <h2 style="color:var(--accent);">Welcome to the most random site!</h2>
     <div class="row">
       <div class="column" style="font-size:15pt;">
         <img
@@ -89,16 +175,15 @@
           decoding="async"
           alt="Lemon Twilight avatar">
       </div>
-      <div class="column" id="intro" style="font-size:15pt;color:#ff70a6;">
+      <div class="column" id="intro" style="font-size:15pt; color:#ff70a6;">
         <p>I wanted to share the things I have made based on my wide variety of hobbies and experiences. I hope you enjoy browsing the crazy parts of my brain.</p>
         <p style="margin-top:1rem;">I collected and put together everything on this site and spent a lot of time researching. Be kind and spread love.</p>
       </div>
     </div>
   </div>
 
-  <!-- FUNKO CONTENT -->
+  <!-- FUNKO TAB CONTENT -->
   <div id="funko" class="tab-content">
-    <!-- background tile and rest of CSS live in styles.min.css -->
     <img
       src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/HPpage1.webp"
       class="funko-img screen-only"
@@ -165,7 +250,7 @@
       alt="checklist5 (print)">
   </div>
 
-  <!-- AC-NH CONTENT -->
+  <!-- AC-NH TAB CONTENT -->
   <div id="acnh" class="tab-content">
     <iframe
       src="only.html"
@@ -176,22 +261,23 @@
     </iframe>
   </div>
 
-  <!-- PROJECTS CONTENT -->
+  <!-- PROJECTS TAB CONTENT -->
   <div id="projects" class="tab-content">
     <h2>Other Projects</h2>
     <p>Things I’m working on…</p>
   </div>
 
-  <!-- CONTACT CONTENT -->
+  <!-- CONTACT TAB CONTENT -->
   <div id="contact" class="tab-content">
     <h2>Contact Me</h2>
-    <!-- add your contact form or links here -->
   </div>
 
-  <footer>&copy; 2025 Lemon Twilight</footer>
+  <footer>
+    &copy; 2025 Lemon Twilight
+  </footer>
 
   <script>
-    // Tab switching
+    // Tab functionality
     document.querySelectorAll('.tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab, .tab-content')
