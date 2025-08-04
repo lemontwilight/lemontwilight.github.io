@@ -5,46 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lemon Twilight</title>
 
-  <!-- You could extract this into an external, minified stylesheet and preload it as shown below:
-  <link rel="preload" href="/css/styles.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/css/styles.min.css"></noscript>
-  -->
+  <!-- 1. Preconnect & preload the bg tile -->
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="preload"
+        href="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_200/colorlemons.webp"
+        as="image" type="image/webp">
 
+  <!-- 2. Inline critical CSS for header + tabs -->
   <style>
     :root {
       --header-height: 60px;
-      --max-width: 900px;
-      /* Switched to HTTPS to avoid redirects/mixed-content delays */
-      --bg-image: url('https://res.cloudinary.com/dwsdvc5sd/image/upload/colorlemons.webp');
-      --text-color: #333;
       --accent: #DA3B81;
-      --tab-bg: #fff;
-      --tab-active-bg: #f8f8f8;
       --tab-border: #ddd;
     }
-
-    /* Reset & box-sizing */
     *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
-
     body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      color: var(--text-color);
       margin: 20px;
-      background: none;
+      font-family: Arial, sans-serif;
+      color: #333;
       position: relative;
     }
-
-    /* Tiled background */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: var(--bg-image) center/500px repeat;
-      opacity: 0.95;
-      z-index: -1;
-    }
-
     header {
       position: sticky;
       top: 0;
@@ -54,247 +34,168 @@
       justify-content: center;
       margin-bottom: 1rem;
     }
-    .logosmall { max-width: 250px; height: auto; }
-
-    nav {
-      display: table;
-      margin: 0 auto 1rem;
-      background: #fff;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      position: sticky;
-      top: var(--header-height);
-      z-index: 1;
-    }
-    nav ul { list-style: none; display: flex; gap: 1rem; }
-    nav a { text-decoration: none; color: var(--accent); font-weight: bold; }
-    nav a:hover { color: #024CBA; }
-
-    /* --- TABS --- */
     .tabs {
       display: flex;
       border-bottom: 2px solid var(--tab-border);
-      max-width: var(--max-width);
+      max-width: 900px;
       margin: 0 auto 1rem;
     }
     .tab {
-      padding: 0.75rem 1.5rem;
+      padding: .75rem 1.5rem;
       cursor: pointer;
-      background: var(--tab-bg);
+      font-weight: bold;
       border: 1px solid var(--tab-border);
       border-bottom: none;
-      margin-right: 0.25rem;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      font-weight: bold;
     }
-    .tab.active { background: var(--tab-active-bg); }
-    .tab-content {
-      display: none;
-      max-width: var(--max-width);
-      margin: 0 auto 2rem;
-      background: #fff;
-      padding: 1rem;
-      border-radius: 0 4px 4px 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .tab-content.active { display: block; }
-
-    main {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 1rem;
-      background: #ffffff;
-      border-radius: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-    }
-    .row { display: flex; gap: 1rem; }
-    .column { flex: 1; padding: 10px; border-radius: 8px; background: #fff; }
-    .avatarme { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-    .funko-img {
-      display: block;
-      width: 100%;
-      max-width: 900px;
-      min-width: 700px;
-      margin: 1rem auto;
-      height: auto;
-      object-fit: contain;
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-    }
-
-    /* Print-specific */
-    .print-only { display: none; }
-    @media print {
-      body * { visibility: hidden; }
-      .tab-content.active, .tab-content.active * { visibility: visible; }
-      .tab-content.active {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-      }
-      .screen-only { display: none !important; }
-      .print-only { display: block !important; }
-      @page { margin: 0; }
-    }
-
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 2rem;
-      color: #555;
-    }
+    .tab.active { background: #f8f8f8; }
   </style>
-</head>
-<body>
 
+  <!-- 3. Defer full CSS -->
+  <link rel="preload" href="/css/styles.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="/css/styles.min.css">
+  </noscript>
+</head>
+
+<body>
   <header>
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/lemontwilightlogo.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
       class="logosmall"
       loading="lazy"
       decoding="async"
       alt="Lemon Twilight logo">
   </header>
 
-  <!-- TABS NAVIGATION -->
+  <!-- TABS NAV -->
   <div class="tabs">
-    <div class="tab active" data-tab="home">Home</div>
-    <div class="tab" data-tab="funko">Funko</div>
-    <div class="tab" data-tab="acnh">AC-NH</div>
-    <div class="tab" data-tab="projects">Projects</div>
-    <div class="tab" data-tab="contact">Contact</div>
+    <div class="tab active"  data-tab="home">Home</div>
+    <div class="tab"         data-tab="funko">Funko</div>
+    <div class="tab"         data-tab="acnh">AC-NH</div>
+    <div class="tab"         data-tab="projects">Projects</div>
+    <div class="tab"         data-tab="contact">Contact</div>
   </div>
 
-  <!-- HOME TAB CONTENT -->
+  <!-- HOME CONTENT -->
   <div id="home" class="tab-content active">
-    <h2 style="color:var(--accent);">Welcome to the most random site!</h2>
+    <h2 style="color:var(--accent)">Welcome to the most random site!</h2>
     <div class="row">
       <div class="column" style="font-size:15pt;">
         <img
-          src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1751426180/rgfunkoheartsoutline_a8vzgd.png"
+          src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_400/rgfunkoheartsoutline_a8vzgd.png"
           class="avatarme"
           loading="lazy"
           decoding="async"
           alt="Lemon Twilight avatar">
       </div>
-      <div class="column" id="intro" style="font-size:15pt; color:#ff70a6;">
-        <p>
-          I wanted to share the things I have made based on my wide variety of hobbies and experiences.
-          I hope you enjoy browsing the crazy parts of my brain.
-        </p>
-        <p style="margin-top:1rem;">
-          I collected and put together everything on this site and spent a lot of time researching.
-          Be kind and spread love.
-        </p>
+      <div class="column" id="intro" style="font-size:15pt;color:#ff70a6;">
+        <p>I wanted to share the things I have made based on my wide variety of hobbies and experiences. I hope you enjoy browsing the crazy parts of my brain.</p>
+        <p style="margin-top:1rem;">I collected and put together everything on this site and spent a lot of time researching. Be kind and spread love.</p>
       </div>
     </div>
   </div>
 
-  <!-- FUNKO TAB CONTENT -->
+  <!-- FUNKO CONTENT -->
   <div id="funko" class="tab-content">
-    <!-- Added lazy-loading & async decode -->
+    <!-- background tile and rest of CSS live in styles.min.css -->
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage1.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/HPpage1.webp"
       class="funko-img screen-only"
       loading="lazy"
       decoding="async"
       alt="checklist1">
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage1lg.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage1lg.webp"
       class="funko-img print-only"
       loading="lazy"
       decoding="async"
       alt="checklist1 (print)">
 
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage2.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage2.webp"
       class="funko-img screen-only"
       loading="lazy"
       decoding="async"
       alt="checklist2">
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage2lg.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage2lg.webp"
       class="funko-img print-only"
       loading="lazy"
       decoding="async"
       alt="checklist2 (print)">
 
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage3.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/HPpage3.webp"
       class="funko-img screen-only"
       loading="lazy"
       decoding="async"
       alt="checklist3">
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage3lg.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage3lg.webp"
       class="funko-img print-only"
       loading="lazy"
       decoding="async"
       alt="checklist3 (print)">
 
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage4.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/HPpage4.webp"
       class="funko-img screen-only"
       loading="lazy"
       decoding="async"
       alt="checklist4">
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage4lg.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage4lg.webp"
       class="funko-img print-only"
       loading="lazy"
       decoding="async"
       alt="checklist4 (print)">
 
-<img
-  src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage5.webp"
-  class="funko-img screen-only"
-  loading="lazy"
-  decoding="async"
-  alt="checklist5">
-
     <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage5lg.webp"
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/HPpage5.webp"
+      class="funko-img screen-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist5">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_900/hppage5lg.webp"
       class="funko-img print-only"
       loading="lazy"
       decoding="async"
       alt="checklist5 (print)">
   </div>
 
-  <!-- AC-NH TAB CONTENT (fixed duplicate ID) -->
+  <!-- AC-NH CONTENT -->
   <div id="acnh" class="tab-content">
     <iframe
       src="only.html"
       width="100%"
       height="1800"
-           
       frameborder="0"
       style="border:none;">
     </iframe>
   </div>
 
-  <!-- PROJECTS TAB CONTENT -->
+  <!-- PROJECTS CONTENT -->
   <div id="projects" class="tab-content">
     <h2>Other Projects</h2>
     <p>Things I’m working on…</p>
   </div>
 
-  <!-- CONTACT TAB CONTENT -->
+  <!-- CONTACT CONTENT -->
   <div id="contact" class="tab-content">
     <h2>Contact Me</h2>
     <!-- add your contact form or links here -->
   </div>
 
-  <footer>
-    &copy; 2025 Lemon Twilight
-  </footer>
+  <footer>&copy; 2025 Lemon Twilight</footer>
 
   <script>
-    // Tab functionality
+    // Tab switching
     document.querySelectorAll('.tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab, .tab-content')
+                .forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(btn.dataset.tab).classList.add('active');
       });
