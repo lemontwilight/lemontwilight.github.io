@@ -108,7 +108,6 @@
     .row { display: flex; gap:1rem; }
     .column { flex:1; padding:10px; border-radius:8px; background:#fff; }
     .avatarme { display:block; margin:0 auto; max-width:100%; height:auto; }
-
     .funko-img {
       display: block;
       width: 100%;
@@ -127,14 +126,32 @@
     .screen-only { display: block; }
 
     @media print {
+      /* Only show active tab content */
       body * { visibility: hidden; }
-      .tab-content.active, .tab-content.active * { visibility: visible; }
+      .tab-content.active,
+      .tab-content.active * {
+        visibility: visible;
+      }
       .tab-content.active {
         position: absolute;
-        top: 0; left: 0; width: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
       }
+
+      /* Swap screen vs print images */
       .screen-only { display: none !important; }
       .print-only { display: block !important; }
+
+      /* Remove all shadows, borders, and outlines in print */
+      .tab-content,
+      .tab-content * {
+        box-shadow: none !important;
+        border: none !important;
+        outline: none !important;
+      }
+
+      /* Reset page margins */
       @page { margin: 0; }
     }
 
