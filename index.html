@@ -4,11 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lemon Twilight</title>
+
+  <!-- You could extract this into an external, minified stylesheet and preload it as shown below:
+  <link rel="preload" href="/css/styles.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/css/styles.min.css"></noscript>
+  -->
+
   <style>
     :root {
       --header-height: 60px;
       --max-width: 900px;
-      --bg-image: url('http://res.cloudinary.com/dwsdvc5sd/image/upload/colorlemons.png');
+      /* Switched to HTTPS to avoid redirects/mixed-content delays */
+      --bg-image: url('https://res.cloudinary.com/dwsdvc5sd/image/upload/colorlemons.png');
       --text-color: #333;
       --accent: #DA3B81;
       --tab-bg: #fff;
@@ -24,8 +31,8 @@
       line-height: 1.5;
       color: var(--text-color);
       margin: 20px;
-      position: relative;
       background: none;
+      position: relative;
     }
 
     /* Tiled background */
@@ -39,20 +46,29 @@
     }
 
     header {
-      position: sticky; top: 0; height: var(--header-height);
-      display:flex; align-items:center; justify-content:center;
-      margin-bottom:1rem;
+      position: sticky;
+      top: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
     }
-    .logosmall { max-width:250px; height:auto; }
+    .logosmall { max-width: 250px; height: auto; }
 
     nav {
-      display: table; margin: 0 auto 1rem;
-      background: #fff; padding:0.5rem 1rem; border-radius:8px;
-      position:sticky; top:var(--header-height); z-index:1;
+      display: table;
+      margin: 0 auto 1rem;
+      background: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      position: sticky;
+      top: var(--header-height);
+      z-index: 1;
     }
-    nav ul { list-style:none; display:flex; gap:1rem; }
-    nav a { text-decoration:none; color:var(--accent); font-weight:bold; }
-    nav a:hover { color:#024CBA; }
+    nav ul { list-style: none; display: flex; gap: 1rem; }
+    nav a { text-decoration: none; color: var(--accent); font-weight: bold; }
+    nav a:hover { color: #024CBA; }
 
     /* --- TABS --- */
     .tabs {
@@ -60,7 +76,6 @@
       border-bottom: 2px solid var(--tab-border);
       max-width: var(--max-width);
       margin: 0 auto 1rem;
-
     }
     .tab {
       padding: 0.75rem 1.5rem;
@@ -73,22 +88,17 @@
       border-top-right-radius: 4px;
       font-weight: bold;
     }
-    .tab.active {
-      background: var(--tab-active-bg);
-    }
+    .tab.active { background: var(--tab-active-bg); }
     .tab-content {
       display: none;
       max-width: var(--max-width);
       margin: 0 auto 2rem;
       background: #fff;
       padding: 1rem;
-      border: 0px solid var(--tab-border);
       border-radius: 0 4px 4px 4px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content.active { display: block; }
 
     main {
       max-width: var(--max-width);
@@ -98,13 +108,10 @@
       border-radius: 15px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
-    .row { display: flex; gap:1rem; }
-    .column { flex:1; padding:10px; border-radius:8px; background:#fff; }
-    .avatarme { display:block; margin:0 auto; max-width:100%; height:auto; }
-
+    .row { display: flex; gap: 1rem; }
+    .column { flex: 1; padding: 10px; border-radius: 8px; background: #fff; }
+    .avatarme { display: block; margin: 0 auto; max-width: 100%; height: auto; }
     .funko-img {
-      border: none !important;
-      box-shadow: none !important;
       display: block;
       width: 100%;
       max-width: 900px;
@@ -112,57 +119,32 @@
       margin: 1rem auto;
       height: auto;
       object-fit: contain;
-    }
-
-
-    /* Hide print-only by default, show screen-only */
-    .print-only {
-      display: none;
-    }
-    footer {
-      text-align:center; font-size:0.9rem; margin-top:2rem; color:#555;
-    }
-
-    @media print {
-      /* Hide everything by default */
-      body * {
-        visibility: hidden;
-      }
-
-      /* Only show the active tab content */
-      .tab-content.active, .tab-content.active * {
-        visibility: visible;
-      }
-
-      /* Ensure it starts from top of the page */
-      .tab-content.active {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-      }
-      .screen-only {
-  display: none !important;
-}
-.print-only {
-  display: block !important;
-}
-}
-
-      /* Optional: remove page margins */
-      @page {
-        margin: 0;
-      }
-    }
-    #funko img,
-    .funko-img {
       border: none !important;
       box-shadow: none !important;
       outline: none !important;
     }
 
-}
+    /* Print-specific */
+    .print-only { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      .tab-content.active, .tab-content.active * { visibility: visible; }
+      .tab-content.active {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+      }
+      .screen-only { display: none !important; }
+      .print-only { display: block !important; }
+      @page { margin: 0; }
+    }
 
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -171,10 +153,10 @@
     <img
       src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1750194264/lemontwilightlogo.png"
       class="logosmall"
+      loading="lazy"
+      decoding="async"
       alt="Lemon Twilight logo">
   </header>
-
-
 
   <!-- TABS NAVIGATION -->
   <div class="tabs">
@@ -185,7 +167,7 @@
     <div class="tab" data-tab="contact">Contact</div>
   </div>
 
-  <!-- TABS CONTENT PANES -->
+  <!-- HOME TAB CONTENT -->
   <div id="home" class="tab-content active">
     <h2 style="color:var(--accent);">Welcome to the most random site!</h2>
     <div class="row">
@@ -193,6 +175,8 @@
         <img
           src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1751426180/rgfunkoheartsoutline_a8vzgd.png"
           class="avatarme"
+          loading="lazy"
+          decoding="async"
           alt="Lemon Twilight avatar">
       </div>
       <div class="column" id="intro" style="font-size:15pt; color:#ff70a6;">
@@ -208,86 +192,98 @@
     </div>
   </div>
 
-
-	<!-- FUNKO TAB DATA-->
-
+  <!-- FUNKO TAB CONTENT -->
   <div id="funko" class="tab-content">
-    <!-- Your Funko section markup here -->
-    <!-- IMAGE: 1 On-screen image -->
+    <!-- Added lazy-loading & async decode -->
     <img
       src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage1.png"
       class="funko-img screen-only"
+      loading="lazy"
+      decoding="async"
       alt="checklist1">
-      <img
-        			src="https://res.cloudinary.com/image/upload/v1754193471/HPpage1.png"
-        class="funko-img print-only"
-        alt="checklist1">
-      <!-- IMAGE: 2 On-screen image -->
-      <img
-					src="https://res.cloudinary.com/image/upload/v1754184466/hppage2.png"
-        class="funko-img screen-only"
-        alt="checklist2">
-        <!-- Print-only image -->
-        <img src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage2lg.png"
-          class="funko-img print-only"
-          alt="checklist2">
-        <!-- IMAGE: 3 On-screen image -->
-        <img
-          src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage3.png"
-          class="funko-img screen-only"
-          alt="checklist3">
-          <!-- Print-only image -->
-          <img
-            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage3lg.png"
-            class="funko-img print-only"
-            alt="checklist3">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage1lg.png"
+      class="funko-img print-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist1 (print)">
 
-            <!-- IMAGE: 4 On-screen image -->
-          <img
-            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage4.png"
-            class="funko-img screen-only"
-            alt="checklist4">
-            <img
-            <!-- Print-only image -->
-            <img
-            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage4lg.png"
-            class="funko-img print-only"
-            alt="checklist4">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage2.png"
+      class="funko-img screen-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist2">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage2lg.png"
+      class="funko-img print-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist2 (print)">
 
-            <!-- IMAGE: 5 On-screen image -->
-            <img
-              src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage5.png"
-              class="funko-img screen-only"
-              alt="checklist5">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage3.png"
+      class="funko-img screen-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist3">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage3lg.png"
+      class="funko-img print-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist3 (print)">
 
-            <!-- Print-only image -->
-            <img
-              src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage5lg.png"
-              class="funko-img print-only"
-              alt="checklist5 (print)">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage4.png"
+      class="funko-img screen-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist4">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage4lg.png"
+      class="funko-img print-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist4 (print)">
 
+<img
+  src="https://res.cloudinary.com/dwsdvc5sd/image/upload/HPpage5.png"
+  class="funko-img screen-only"
+  loading="lazy"
+  decoding="async"
+  alt="checklist5">
 
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/hppage5lg.png"
+      class="funko-img print-only"
+      loading="lazy"
+      decoding="async"
+      alt="checklist5 (print)">
   </div>
 
+  <!-- AC-NH TAB CONTENT (fixed duplicate ID) -->
   <div id="acnh" class="tab-content">
-    <!-- Your AC-NH section markup here -->
-<p>test</po>
-  <div id="acnh" class="tab-content">
-    <iframe src="only.html" width="100%" height="1800" frameborder="0" style="border:none;"></iframe>
+    <iframe
+      src="only.html"
+      width="100%"
+      height="1800"
+           
+      frameborder="0"
+      style="border:none;">
+    </iframe>
   </div>
 
-  </div>
-
+  <!-- PROJECTS TAB CONTENT -->
   <div id="projects" class="tab-content">
-    <!-- Your Projects section markup here -->
     <h2>Other Projects</h2>
     <p>Things I’m working on…</p>
   </div>
 
+  <!-- CONTACT TAB CONTENT -->
   <div id="contact" class="tab-content">
-    <!-- Your Contact section markup here -->
     <h2>Contact Me</h2>
-
+    <!-- add your contact form or links here -->
   </div>
 
   <footer>
@@ -298,9 +294,7 @@
     // Tab functionality
     document.querySelectorAll('.tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        // deactivate all tabs + contents
         document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
-        // activate clicked tab + corresponding pane
         btn.classList.add('active');
         document.getElementById(btn.dataset.tab).classList.add('active');
       });
