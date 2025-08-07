@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dynamic Calendar</title>
+
+  <!-- Optional Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Rubik&family=Indie+Flower&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Darker+Grotesque:wght@300..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Edu+NSW+ACT+Cursive:wght@400..700&family=Edu+SA+Beginner:wght@400..700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IM+Fell+DW+Pica:ital@0;1&family=Just+Another+Hand&family=La+Belle+Aurore&family=Meddon&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Patrick+Hand&family=Playwrite+AU+SA:wght@100..400&family=Playwrite+HU:wght@100..400&family=Pompiere&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
+
+
+  <style>
+    /* === GLOBAL BODY STYLING === */
+    body {
+      font-family: 'Times New Roman', serif;
+      background: white;
+      padding: 40px;
+      text-transform: uppercase;
+    }
+
+    /* === CALENDAR TITLE === */
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    /* === HEADER LOGO === */
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    header img.logosmall {
+      max-width: 200px;
+      height: auto;
+    }
+
+    /* === DAY NUMBER IN CELLS === */
+    .day-label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* === CONTROLS (Month/Year/Options) === */
+    .controls {
+      text-align: center;
+    }
+
+    .controls label,
+    .controls input,
+    .controls select {
+      font-size: 11px;
+      margin-left: 1px;
+      margin-top: 15px;
+      padding: 4px 8px;
+      align-items: center;
+      font-family: inherit;
+      text-transform: uppercase;
+    }
+
+    .controls input[type="color"],
+    .controls input[type="number"] {
+      padding: 0;
+      height: 30px;
+      vertical-align: middle;
+    }
+
+    .controls input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: -18px;
+      padding-left: 15px;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .controls-row label,
+    .controls-row input,
+    .controls-row select {
+      font-size: 11px;
+      padding: 4px 8px;
+      font-family: inherit;
+      text-transform: uppercase;
+    }
+
+    .no-print {
+      display: block;
+    }
+
+    /* === LANDSCAPE TOGGLE === */
+    .landscape-toggle {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* === TITLE ADJUSTMENT WHEN LANDSCAPE === */
+    body.landscape-mode h1 {
+      margin-top: 10px;
+    }
+
+    /* === CALENDAR TABLE === */
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    body.landscape-mode table.calendar {
+      width: 95vw;
+      height: 60vw;
+      max-width: none;
+    }
+
+    /* === TABLE HEADER CELLS === */
+    table.calendar th {
+      background-color: #619ca3;
+      color: black;
+      font-size: 11px;
+      border: 2px solid #333;
+    }
+
+    /* === CALENDAR CELLS === */
+    table.calendar td {
+      aspect-ratio: 1 / 1;
+      width: 100px;
+      height: 100px;
+      height: auto;
+      width: 100%;
+      vertical-align: top;
+      text-align: left;
+      padding: 2px 5px;
+      font-size: 16px;
+      border: 2px solid #333;
+      box-sizing: border-box;
+    }
+
+
+    .font-dropdown {
+      position: relative;
+      width: 179px;
+      font-size: 11px;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .font-dropdown .selected {
+      padding: 2px 2px;
+      margin-top: 17px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      font-family: 'Times New Roman', serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .font-dropdown .options {
+      display: none;
+      position: absolute;
+      width: 100%;
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      background: white;
+      z-index: 1000;
+    }
+
+    .font-dropdown .option {
+      padding: 4px 4px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .font-dropdown .option:hover {
+      background-color: #f0f0f0;
+    }
+
+
+    /* === BLANK CELL CLASSES === */
+    .top-blank {
+      background-color: #cfe5e7;
+    }
+
+    .bottom-blank {
+      background: none !important;
+      border: none !important;
+    }
+
+    /* === NOTE AREA === */
+    .note-area {
+      text-transform: none !important;
+      font-size: 12px;
+      line-height: 1.2em;
+    }
+
+    .note-divider {
+      border-top: 1px dashed lightgrey;
+      margin: 2px 0;
+    }
+
+    /* === FOOTER NOTE === */
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      margin-top: 10px;
+      text-transform: none;
+      color: #666;
+    }
+
+    /* === NOTES TEXTAREA SECTION === */
+    .notes-box {
+      margin: 10px auto 10px;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-family: monospace;
+      font-size: 11px;
+      margin-bottom: 10px;
+      text-transform: none;
+      white-space: pre;
+    }
+
+    .notes-box label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .notes-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .notes-controls input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 5px;
+    }
+
+    textarea::placeholder {
+      font-style: italic;
+      color: #888;
+      white-space: pre-line;
+    }
+
+    /* === INNER SQUARE CELL === */
+    .square-cell {
+      aspect-ratio: 1 / 1;
+      width: 90px;
+      height: 90px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 2px 5px;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .square-cell .note-area {
+      font-size: 11px;
+      line-height: 1.2em;
+      text-transform: none;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      .note-area:focus {
+        outline: none !important;
+      }
+
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .print-wrapper {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        padding-bottom: 5px; /* add bottom space to push footer away */
+      }
+
+      .footer-note {
+        display: block !important;
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        background: white;
+        padding: 0px 0 5px;
+        color: #666;
+        margin-top: 0px;
+      }
+    }
+
+
+    @page {
+      margin: 0mm 0mm 0mm 0mm; /* top, right, bottom, left */
+    }
+
+  </style>
+</head>
+<body>
+  <header class="no-print" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; width: 100vw; margin-left: -40px;">
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
+      class="logosmall"
+      loading="lazy"
+      decoding="async"
+      alt="Lemon Twilight logo">
+  </header>
+
+  <div class="controls no-print">
+    <label for="month">Month:</label>
+    <select id="month"></select>
+
+    <label for="year">Year:</label>
+    <select id="year"></select>
+
+    <label for="start-week">Start Week On:</label>
+    <select id="start-week">
+      <option value="sun">Sunday</option>
+      <option value="mon">Monday</option>
+    </select>
+
+    <!-- === FIRST FLEX ROW (Layout Options) === -->
+    <div class="controls-row" style="margin:-7px;">
+      <label for="header-color">Header Color</label>
+      <input type="color" id="header-color" value="#619ca3">
+
+      <input type="checkbox" id="header-text-white">
+      <label for="header-text-white">White Header Text</label>
+
+      <input type="checkbox" id="show-year" checked>
+      <label for="show-year">Show Year</label>
+
+      <input type="checkbox" id="landscape-switch">
+      <label for="landscape-switch">Landscape Layout</label>
+    </div>
+<div style="margin:20px; color: #fdd310;">
+<p></p>
+<hr style="border: none; border-top: 2px dashed #fdd310; margin: 10px 0;">
+</div>
+
+<div class:"no-print" style="color: #f92d9f; font-weight: bold; font-size: 14px; margin-bottom: 10px; text-transform: none;">
+  <p style="margin: 0;">
+    Settings below this line <strong>MUST</strong> be changed
+    <u>before</u> entering information in the calendar,<br>
+    or it will be <em>erased</em>.
+  </p>
+</div>
+
+
+    <!-- === SECOND FLEX ROW (Font + Colors) === -->
+    <div class="controls-row" style="margin-top: -15px;">
+
+      <label for="font-select">Font</label>
+      <div class="font-dropdown no-print" id="fontDropdown">
+        <div class="selected" id="selectedFont" data-value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">
+          Times New Roman
+        </div>
+        <div class="options" id="fontOptions">
+          <div class="option" data-value="'Arial', sans-serif" style="font-family: Arial, sans-serif;">Arial</div>
+          <div class="option" data-value="'Asap', sans-serif" style="font-family: 'Asap', sans-serif;">Asap</div>
+          <div class="option" data-value="'Caladea', serif" style="font-family: 'Caladea', serif;">Caladea</div>
+          <div class="option" data-value="'Crimson Text', serif" style="font-family: 'Crimson Text', serif;">Crimson Text</div>
+          <div class="option" data-value="'Darker Grotesque', sans-serif" style="font-family: 'Darker Grotesque', sans-serif;">Darker Grotesque</div>
+          <div class="option" data-value="'EB Garamond', serif" style="font-family: 'EB Garamond', serif;">EB Garamond</div>
+          <div class="option" data-value="'Edu NSW ACT Cursive', cursive" style="font-family: 'Edu NSW ACT Cursive', cursive;">Edu NSW ACT Cursive</div>
+          <div class="option" data-value="'Edu SA Beginner', cursive" style="font-family: 'Edu SA Beginner', cursive;">Edu SA Beginner</div>
+          <div class="option" data-value="'IBM Plex Sans', sans-serif" style="font-family: 'IBM Plex Sans', sans-serif;">IBM Plex Sans</div>
+          <div class="option" data-value="'IM Fell DW Pica', serif" style="font-family: 'IM Fell DW Pica', serif;">IM Fell DW Pica</div>
+          <div class="option" data-value="'Just Another Hand', cursive" style="font-family: 'Just Another Hand', cursive;">Just Another Hand</div>
+          <div class="option" data-value="'La Belle Aurore', cursive" style="font-family: 'La Belle Aurore', cursive;">La Belle Aurore</div>
+          <div class="option" data-value="'Meddon', cursive" style="font-family: 'Meddon', cursive;">Meddon</div>
+          <div class="option" data-value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Montserrat</div>
+          <div class="option" data-value="'Patrick Hand', cursive" style="font-family: 'Patrick Hand', cursive;">Patrick Hand</div>
+          <div class="option" data-value="'Playwrite AU SA', sans-serif" style="font-family: 'Playwrite AU SA', sans-serif;">Playwrite AU SA</div>
+          <div class="option" data-value="'Playwrite HU', sans-serif" style="font-family: 'Playwrite HU', sans-serif;">Playwrite HU</div>
+          <div class="option" data-value="'Pompiere', cursive" style="font-family: 'Pompiere', cursive;">Pompiere</div>
+          <div class="option" data-value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif;">Raleway</div>
+        </div>
+      </div>
+      <!-- Hidden fallback input that your calendar JS reads -->
+      <input type="hidden" id="font-select" value="'Times New Roman', serif">
+
+      <label for="event-size">Event Size</label>
+      <select id="event-size">
+        <option value="8pt">8 pt</option>
+        <option value="9pt" selected>9 pt</option>
+        <option value="10pt">10 pt</option>
+        <option value="11pt">11 pt</option>
+        <option value="12pt">12 pt</option>
+      </select>
+
+      <label for="number-color">Number Color</label>
+      <input type="color" id="number-color" value="#000000">
+
+      <label for="event-color">Event Color</label>
+      <input type="color" id="event-color" value="#000000">
+    </div>
+  </div>
+
+
+  <h1 id="calendar-title"></h1>
+
+  <table class="calendar">
+    <thead><tr id="calendar-header-row"></tr></thead>
+    <tbody id="calendar-body"></tbody>
+  </table>
+
+
+  <div class="no-print" style="margin:20px; color: #fdd310;">
+  <p></p>
+  <hr style="border: none; border-top: 2px dashed #fdd310; margin: 10px 0;">
+  </div>
+
+  <div class="no-print" style="text-align: center; margin: 0 auto; max-width: 600px;">
+    <div style="color: #f92d9f; font-weight: bold; font-size: 14px; margin-bottom: 10px; text-transform: none;">
+      <p style="margin: 0;">
+        Bulk Event Adder – This is the best method if you need to add events to months often.
+        <br>You can copy and paste it in as long as it's formatted as a list.
+      </p>
+    </div>
+
+    <div class="notes-controls no-print" style="display: inline-flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+      <label style="display: flex; align-items: center;">
+        <input type="checkbox" id="divider-toggle" checked> Show Dividers
+      </label>
+      <button onclick="applyBulkNotes()">Apply Notes</button>
+      <button onclick="clearCalendar()">Clear Calendar</button>
+    </div>
+  </div>
+
+  <div class="notes-box no-print">
+    <label for="bulk-notes"></label>
+    <textarea id="bulk-notes" placeholder="
+Do not mix methods of entering events on calendar. If you click apply it will erase
+any changes you made manually (not in this box).
+USE THIS if you may need to make changes to your settings as this field will
+no clear unless you click the button and you can reapply!
+
+Each Line is an Event:
+  1: John's Birthday
+  5: First Day of School
+  5: 3:45pm Ycare Afterschool
+  7: Vacation"></textarea>
+
+</div> <!-- Close .notes-box -->
+
+<footer class="footer-note">
+  Generated by lemontwilight.com
+</footer>
+
+
+<script>
+  const calendarTitle = document.getElementById("calendar-title");
+  const calendarBody = document.getElementById("calendar-body");
+  const calendarHeaderRow = document.getElementById("calendar-header-row");
+  const monthSelect = document.getElementById("month");
+  const yearSelect = document.getElementById("year");
+  const headerColorInput = document.getElementById("header-color");
+  const headerTextWhiteToggle = document.getElementById("header-text-white");
+  const showYearToggle = document.getElementById("show-year");
+  const startWeekSelect = document.getElementById("start-week");
+  const dividerToggle = document.getElementById("divider-toggle");
+  const landscapeSwitch = document.getElementById("landscape-switch");
+
+  const fontSelect = document.getElementById("font-select");
+  const eventSizeInput = document.getElementById("event-size");
+  const eventColorInput = document.getElementById("event-color");
+  const numberColorInput = document.getElementById("number-color");
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const daysSun = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysMon = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  for (let i = 0; i < 12; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = monthNames[i];
+    monthSelect.appendChild(opt);
+  }
+
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear - 50; y <= currentYear + 50; y++) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+  }
+
+  const now = new Date();
+  monthSelect.value = now.getMonth();
+  yearSelect.value = now.getFullYear();
+
+  const tallFonts = [
+    "'Edu NSW ACT Cursive', cursive",
+    "'La Belle Aurore', cursive",
+    "'Meddon', cursive",
+    "'Playwrite AU SA', sans-serif",
+    "'Playwrite HU', sans-serif"
+  ];
+
+  const cursiveFonts = [
+    "'Edu NSW ACT Cursive', cursive",
+    "'La Belle Aurore', cursive",
+    "'Meddon', cursive"
+  ];
+
+  function lightenColor(hex, percent) {
+    const num = parseInt(hex.slice(1), 16);
+    const amt = Math.round(2.55 * percent);
+    let R = (num >> 16) + amt;
+    let G = (num >> 8 & 0x00FF) + amt;
+    let B = (num & 0x0000FF) + amt;
+    R = Math.min(R, 245);
+    G = Math.min(G, 245);
+    B = Math.min(B, 245);
+    return "#" + (
+      0x1000000 +
+      (R < 255 ? (R < 0 ? 0 : R) : 255) * 0x10000 +
+      (G < 255 ? (G < 0 ? 0 : G) : 255) * 0x100 +
+      (B < 255 ? (B < 0 ? 0 : B) : 255)
+    ).toString(16).slice(1);
+  }
+
+  function updatePageMargin(font) {
+    const styleTag = document.getElementById('dynamicPageStyle') || document.createElement('style');
+    styleTag.id = 'dynamicPageStyle';
+    const marginTop = tallFonts.includes(font) ? '0mm' : '10mm';
+    styleTag.innerHTML = `
+      @media print {
+        @page {
+          margin: ${marginTop} 0mm 0mm 0mm;
+        }
+      }
+    `;
+    document.head.appendChild(styleTag);
+  }
+
+  function updateHeaderCase(font) {
+    if (cursiveFonts.includes(font)) {
+      calendarTitle.style.textTransform = "capitalize";
+    } else {
+      calendarTitle.style.textTransform = "uppercase";
+    }
+  }
+
+  function renderCalendar(year, month) {
+    const startOnMonday = startWeekSelect.value === "mon";
+    const dayLabels = startOnMonday ? daysMon : daysSun;
+    calendarHeaderRow.innerHTML = dayLabels.map(day => `<th>${day}</th>`).join("");
+
+    const date = new Date(year, month, 1);
+    const fontFamily = fontSelect.value;
+    const monthName = monthNames[month];
+    calendarTitle.textContent = showYearToggle.checked ? `${monthName} ${year}` : `${monthName}`;
+    calendarTitle.style.fontFamily = fontFamily;
+    updatePageMargin(fontFamily);
+    updateHeaderCase(fontFamily);
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const dayOfWeek = date.getDay();
+    let startOffset = startOnMonday ? ((dayOfWeek + 6) % 7) : dayOfWeek;
+
+    const rows = [];
+    let day = 1;
+    let row = new Array(7).fill("");
+    for (let i = startOffset; i < 7; i++) row[i] = day++;
+    rows.push(row);
+
+    while (day <= daysInMonth) {
+      row = new Array(7).fill("");
+      for (let i = 0; i < 7 && day <= daysInMonth; i++) row[i] = day++;
+      rows.push(row);
+    }
+
+    while (rows.length > 0 && rows[rows.length - 1].every(cell => cell === "")) {
+      rows.pop();
+    }
+
+    const lightColor = lightenColor(headerColorInput.value, 35);
+    const eventSize = eventSizeInput.value;
+    const eventColor = eventColorInput.value;
+    const numberColor = numberColorInput.value;
+
+    calendarBody.innerHTML = rows.map((week, rowIndex) => {
+      return "<tr>" + week.map((cell, colIndex) => {
+        const isTopBlank = rowIndex === 0 && cell === "";
+        const isBottomBlank = cell === "" && rowIndex !== 0;
+        const cellClass = isTopBlank ? 'top-blank' : isBottomBlank ? 'bottom-blank' : '';
+        const style = isTopBlank ? `background-color:${lightColor};` : '';
+        return `<td class="${cellClass}" style="${style}">
+          <div class="square-cell" style="font-family:${fontFamily};">
+            <strong class="day-label" style="color:${numberColor};">${cell}</strong>
+            <div class="note-area" contenteditable="true" spellcheck="false" style="font-size:${eventSize}; color:${eventColor}; font-family:${fontFamily};"></div>
+          </div>
+        </td>`;
+      }).join("") + "</tr>";
+    }).join("");
+
+    document.querySelectorAll("table.calendar th").forEach(th => {
+      th.style.backgroundColor = headerColorInput.value;
+      th.style.color = headerTextWhiteToggle.checked ? "#fff" : "#000";
+    });
+  }
+
+  function updateCalendar() {
+    renderCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value));
+  }
+
+  function applyBulkNotes() {
+    const textarea = document.getElementById("bulk-notes");
+    const lines = textarea.value.trim().split("\n");
+    const noteMap = new Map();
+    for (const line of lines) {
+      const parts = line.split(":");
+      if (parts.length < 2) continue;
+      const day = parts[0].trim();
+      const note = parts.slice(1).join(":").trim();
+      if (!noteMap.has(day)) noteMap.set(day, []);
+      noteMap.get(day).push(note);
+    }
+
+    noteMap.forEach((notes, day) => {
+      const td = [...document.querySelectorAll("td")].find(td => {
+        const label = td.querySelector(".day-label");
+        return label && label.textContent.trim() === day;
+      });
+      if (td) {
+        const noteArea = td.querySelector(".note-area");
+        if (noteArea) {
+          noteArea.innerHTML = "";
+          notes.forEach((note, index) => {
+            if (index > 0 && dividerToggle.checked) {
+              noteArea.innerHTML += `<div class="note-divider"></div>`;
+            }
+            noteArea.innerHTML += `<div>${note}</div>`;
+          });
+        }
+      }
+    });
+  }
+
+  function clearCalendar() {
+    document.querySelectorAll(".note-area").forEach(div => div.innerHTML = "");
+  }
+
+  // Event listeners
+  monthSelect.addEventListener("change", updateCalendar);
+  yearSelect.addEventListener("change", updateCalendar);
+  headerColorInput.addEventListener("input", updateCalendar);
+  headerTextWhiteToggle.addEventListener("change", updateCalendar);
+  showYearToggle.addEventListener("change", updateCalendar);
+  startWeekSelect.addEventListener("change", updateCalendar);
+  fontSelect.addEventListener("change", updateCalendar);
+  eventSizeInput.addEventListener("input", updateCalendar);
+  eventColorInput.addEventListener("input", updateCalendar);
+  numberColorInput.addEventListener("input", updateCalendar);
+  landscapeSwitch.addEventListener("change", () => {
+    document.body.classList.toggle("landscape-mode", landscapeSwitch.checked);
+  });
+
+  updateCalendar();
+
+  // Font dropdown logic
+  const fontDropdown = document.getElementById("fontDropdown");
+  const selectedFont = document.getElementById("selectedFont");
+  const fontOptions = document.getElementById("fontOptions");
+
+  selectedFont.addEventListener("click", () => {
+    fontOptions.style.display = fontOptions.style.display === "block" ? "none" : "block";
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!fontDropdown.contains(e.target)) {
+      fontOptions.style.display = "none";
+    }
+  });
+
+  document.querySelectorAll("#fontOptions .option").forEach(option => {
+    option.addEventListener("click", () => {
+      const fontValue = option.dataset.value;
+      const fontName = option.textContent;
+      selectedFont.textContent = fontName;
+      selectedFont.style.fontFamily = fontValue;
+      selectedFont.setAttribute("data-value", fontValue);
+      fontSelect.value = fontValue;
+      fontOptions.style.display = "none";
+      updateCalendar();
+    });
+  });
+</script>
+
+</body>
+</html>
