@@ -693,6 +693,26 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
     document.querySelectorAll(".note-area").forEach(div => div.innerHTML = "");
   }
 
+  // Lock/unlock the calendar's pixel size in landscape
+  function lockLandscapeSize() {
+    const table = document.querySelector('table.calendar');
+    if (!table) return;
+    const r = table.getBoundingClientRect();
+    table.style.setProperty('width',  Math.round(r.width)  + 'px', 'important');
+    table.style.setProperty('height', Math.round(r.height) + 'px', 'important');
+    table.style.setProperty('max-width', 'none', 'important');
+  }
+
+  function unlockLandscapeSize() {
+    const table = document.querySelector('table.calendar');
+    if (!table) return;
+    table.style.removeProperty('width');
+    table.style.removeProperty('height');
+    table.style.removeProperty('max-width');
+  }
+
+
+
   // Event listeners
   monthSelect.addEventListener("change", updateCalendar);
   yearSelect.addEventListener("change", updateCalendar);
@@ -706,8 +726,18 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
   numberColorInput.addEventListener("input", updateCalendar);
   landscapeSwitch.addEventListener("change", () => {
     document.body.classList.toggle("landscape-mode", landscapeSwitch.checked);
-    updateCalendar();
+    updateCalendar(); // render first so sizes are final
+    if (landscapeSwitch.checked) {
+      // wait a tick so CSS applies, then lock current px size
+      requestAnimationFrame(() => requestAnimationFrame(lockLandscapeSize));
+    } else {
+      // back to portrait: restore responsive behavior
+      unlockLandscapeSize();
+    }
   });
+
+
+
   updateCalendar();
 
   // Font dropdown logic
