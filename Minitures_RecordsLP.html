@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini LP Combo — Jacket + Record ×2 • PNG @ 300 DPI</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --bg:#fff;           /* plain white */
+    --panel:#ffffff;
+    --muted:#666;
+    --accent:#da3a81;    /* pink buttons */
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--ink);margin:0;overflow-x:hidden;width:100%}
+  body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+
+  /* Header */
+  header{padding:18px 20px;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10;text-align:center}
+  header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
+
+  /* Fixed layout */
+  main{max-width:1140px;margin:18px auto 60px;padding:0 16px}
+  .grid{display:grid;grid-template-columns:360px 760px;gap:16px;width:fit-content;margin-left:auto;margin-right:auto}
+
+  .card{background:var(--panel);border:1px solid #e6e6e6;border-radius:14px;padding:14px}
+  .grid > section.card:first-of-type{ --panel:#da3a811a; border-color:#da3a8126; } /* 10% pink tint on left card only */
+  .card h2{margin:0 0 8px;font-size:16px}
+  label{font-size:13px;color:var(--muted);display:block;margin:6px 0 4px}
+
+  select,input[type="range"]{width:100%;accent-color:var(--accent)}
+  select{padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:14px}
+
+  /* Smaller upload areas */
+  .drop{
+    border:1.6px dashed #bbb;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:92px;background:#fcfcfc;cursor:pointer;text-align:center;padding:6px
+  }
+  .drop.drag{border-color:#111}
+  .drop small{color:#777}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* Buttons */
+  .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:transform .06s ease, box-shadow .06s ease}
+  .btn-primary{color:#fff;background:#da3a81;box-shadow:0 1px 0 rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.15)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.15)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-secondary{background:#f1f1f1;color:#111;border:1px solid #ddd}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;justify-content:center}
+  .size-readout{color:#777;text-align:center;margin-top:6px;font-weight:600}
+
+  .notice{font-size:12px;color:#555;line-height:1.35;background:#fff;border:1px solid #eee;border-radius:12px;padding:10px;margin-top:8px;text-align:center}
+
+  /* Preview: centered */
+  .legend, .previewWrap{ width:720px; max-width:720px; margin:0 auto; }
+  .legend{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:12px; color:#444; }
+  .legend .cap{ background:#f5f5f5; border:1px solid #ddd; border-radius:999px; padding:3px 8px; }
+  .previewWrap{ overflow:hidden; display:flex; justify-content:center; align-items:center; }
+  canvas{display:block;background:#fff;border-radius:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mini LP Combo — Jacket + Record ×2</h1>
+  <div class="sub">Jacket (left; fixed 0.25″ flaps on back) + Two matching records (right) • Drag & Zoom • PNG @ 300 DPI</div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>1) Add your images</h2>
+
+      <label>Jacket: <b>Back cover</b> (left panel)</label>
+      <div class="drop" id="backDrop"><div><strong>Drop image</strong><br><small>or click to pick…</small></div></div>
+      <input id="backFile" type="file" accept="image/*" hidden>
+
+      <label style="margin-top:8px">Jacket: <b>Front cover</b> (right panel)</label>
+      <div class="drop" id="frontDrop"><div><strong>Drop image</strong><br><small>or click to pick…</small></div></div>
+      <input id="frontFile" type="file" accept="image/*" hidden>
+
+      <label style="margin-top:8px">Record: <b>Disc art</b> (circle)</label>
+      <div class="drop" id="discDrop"><div><strong>Drop image</strong><br><small>or click to pick…</small></div></div>
+      <input id="discFile" type="file" accept="image/*" hidden>
+
+      <h2 style="margin-top:14px;">2) Size & edit</h2>
+      <label>Jacket panel size (each panel is square; back flaps are always exactly 0.25″)</label>
+      <select id="panelPreset">
+        <optgroup label="1:6 scale (doll 12″ album look)">
+          <option value="1.50">1.50" — 1:6 7" single vibe (small prop)</option>
+          <option value="1.75">1.75" — 1:6 10" EP feel</option>
+          <option value="2.00" selected>2.00" — 1:6 12" LP (default)</option>
+          <option value="2.25">2.25" — oversized look</option>
+          <option value="2.50">2.50" — extra large display</option>
+        </optgroup>
+        <optgroup label="1:12 scale (half-size minis)">
+          <option value="1.00">1.00" — 1:12 12" LP</option>
+          <option value="0.875">0.875" — 1:12 10" EP (~7/8")</option>
+          <option value="0.625">0.625" — 1:12 7" single (5/8")</option>
+        </optgroup>
+      </select>
+
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Editing target</label>
+          <select id="editTarget">
+            <option value="back">Jacket — Back (left)</option>
+            <option value="front">Jacket — Front (right)</option>
+            <option value="record">Record — Disc</option>
+          </select>
+        </div>
+        <div>
+          <label>Zoom (% of “fit to area”)</label>
+          <!-- ultra-fine slider: 0.1 steps; zoom is still quantized to 2px increments -->
+          <input id="zoomSlider" type="range" min="100" max="130" step="0.1" value="100" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="resetBtn" class="btn btn-secondary">Reset selected</button>
+        <button id="exportPNG" class="btn btn-primary">Export PNG @ 300 DPI</button>
+      </div>
+
+      <div id="sizeReadout" class="size-readout"></div>
+
+      <p class="notice">
+        Export places the <b>Jacket</b> on the left and two identical <b>Records</b> on the right with tiny gaps.
+        Record diameter auto-matches your jacket scale (2.00″ panel ⇒ 1.87″ disc).
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Preview <span class="pill">Editing: <b id="editingLabel">Jacket — Back</b></span></h2>
+      <div id="legend" class="legend">
+        <span class="cap">Jacket</span>
+        <span class="cap">Record ×2</span>
+      </div>
+      <div class="previewWrap" id="previewWrap">
+        <canvas id="cv" width="10" height="10" aria-label="print canvas"></canvas>
+      </div>
+<p class="muted" style="text-align:center">Export the image. Cut out along the edge, then fold the black edge down (.25”). Depneding on margins you can fit 4 record sets of 1:6 per page.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+/* ========================
+   Mini LP Combo — Jacket + Record ×2
+   - Second record is an exact duplicate of the editable record (same art & transform)
+   ======================== */
+
+/* ----- constants ----- */
+const DPI = 300;
+const FLAP_IN = 0.25;
+const FLAP_RADIUS_IN = 0.06;
+const GAP_IN = 0.0625;                  // gap jacket->record and record1->record2
+const BASE_PANEL_IN = 2.00;
+const DISC_RATIO = 0.935;
+const BASE_PREVIEW_W = 720;
+
+/* slider/zoom bounds */
+const ZOOM_MIN = 1.00;   // 100%
+const ZOOM_MAX = 1.30;   // 130%
+
+/* ----- globals & UI refs ----- */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d', { alpha:false });
+const wrap = document.getElementById('previewWrap');
+const legend = document.getElementById('legend');
+
+const UI = {
+  panelPreset : document.getElementById('panelPreset'),
+  editTarget  : document.getElementById('editTarget'),
+  zoomSlider  : document.getElementById('zoomSlider'),
+  editingLabel: document.getElementById('editingLabel'),
+  sizeReadout : document.getElementById('sizeReadout')
+};
+
+let frontImg=null, backImg=null, discImg=null;
+const state = {
+  back:   { zoom:1, tx:0, ty:0, baseScale:1, inited:false },
+  front:  { zoom:1, tx:0, ty:0, baseScale:1, inited:false },
+  record: { zoom:1, tx:0, ty:0, baseScale:1, inited:false } // drives BOTH discs
+};
+let dragging = { active:false, target:null, startX:0, startY:0, startTx:0, startTy:0 };
+
+/* ----- helpers ----- */
+const inchesToPx = i => Math.round(i*DPI);
+const pxToIn = px => px/DPI;
+
+function setupDrop(areaId, fileId, assign){
+  const area=document.getElementById(areaId), inp=document.getElementById(fileId);
+  area.addEventListener('click',()=>inp.click());
+  ['dragenter','dragover'].forEach(e=>area.addEventListener(e,ev=>{ev.preventDefault();area.classList.add('drag');}));
+  ['dragleave','drop'].forEach(e=>area.addEventListener(e,ev=>{ev.preventDefault();area.classList.remove('drag');}));
+  area.addEventListener('drop',ev=>{const f=ev.dataTransfer.files?.[0]; if(f) loadImg(f,assign,area);});
+  inp.addEventListener('change',ev=>{const f=ev.target.files?.[0]; if(f) loadImg(f,assign,area);});
+}
+function loadImg(file, assign, area){
+  const url=URL.createObjectURL(file); const img=new Image();
+  img.onload=()=>{ URL.revokeObjectURL(url); assign(img);
+    area.innerHTML=`<div><strong>Loaded</strong><br><small>${img.naturalWidth}×${img.naturalHeight}</small></div>`;
+    const key = assign===assignFront ? 'front' : (assign===assignBack ? 'back' : 'record');
+    state[key].zoom=1; state[key].inited=false; render(); };
+  img.src=url;
+}
+function assignFront(img){frontImg=img;} function assignBack(img){backImg=img;} function assignDisc(img){discImg=img;}
+setupDrop('frontDrop','frontFile',assignFront);
+setupDrop('backDrop','backFile',assignBack);
+setupDrop('discDrop','discFile',assignDisc);
+
+function computeBaseScale(img,w,h){ if(!img) return 1; return Math.max(w/img.naturalWidth, h/img.naturalHeight); }
+function ensureInit(key,img,w,h){
+  const s=state[key]; if(!img) return;
+  s.baseScale=computeBaseScale(img,w,h);
+  const W=img.naturalWidth*s.baseScale*s.zoom, H=img.naturalHeight*s.baseScale*s.zoom;
+  if(!s.inited){ s.tx=(w-W)/2; s.ty=(h-H)/2; s.inited=true; }
+  else { clampTransform(key,img,w,h); }
+}
+function clampTransform(key,img,w,h){
+  const s=state[key];
+  const W=img.naturalWidth*s.baseScale*s.zoom, H=img.naturalHeight*s.baseScale*s.zoom;
+  s.tx=Math.max(w-W, Math.min(0, s.tx));
+  s.ty=Math.max(h-H, Math.min(0, s.ty));
+}
+
+/* --- quantize zoom so the drawn image increases in 2px steps --- */
+function quantizeZoom2px(img, rectW, rectH, desiredZoom){
+  if(!img) return desiredZoom;
+  const baseScale = computeBaseScale(img, rectW, rectH);
+  const drawW0 = img.naturalWidth  * baseScale;      // width at 1.00
+  const drawWDesired = drawW0 * desiredZoom;
+  const k = Math.max(0, Math.round((drawWDesired - drawW0) / 2));   // 2px steps
+  const drawWQuant = drawW0 + k*2;
+  const zq = drawWQuant / drawW0;
+  return Math.min(Math.max(zq, ZOOM_MIN), ZOOM_MAX);
+}
+
+/* drawing helpers */
+function drawPanel(img,key,x,y,w,h){
+  const s=state[key];
+  if(img){
+    s.baseScale=computeBaseScale(img,w,h);
+    const W=img.naturalWidth*s.baseScale*s.zoom, H=img.naturalHeight*s.baseScale*s.zoom;
+    ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img, x+s.tx, y+s.ty, W, H); ctx.restore();
+  }else{
+    ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+    ctx.fillStyle='#f7f7f7'; ctx.fillRect(x,y,w,h);
+    ctx.fillStyle='#9a9a9a'; ctx.font=`${Math.max(10,Math.floor(w/12))}px sans-serif`;
+    ctx.textAlign='center'; ctx.fillText('Load image', x+w/2, y+h/2); ctx.restore();
+  }
+}
+function drawDisc(img,key,x,y,size){
+  const s=state[key];
+  if(img){
+    s.baseScale=computeBaseScale(img,size,size);
+    const W=img.naturalWidth*s.baseScale*s.zoom, H=img.naturalHeight*s.baseScale*s.zoom;
+    ctx.save(); const cx=x+size/2, cy=y+size/2, r=size/2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.closePath(); ctx.clip();
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img, x+s.tx, y+s.ty, W, H); ctx.restore();
+  }else{
+    ctx.save(); const cx=x+size/2, cy=y+size/2, r=size/2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.closePath(); ctx.clip();
+    ctx.fillStyle='#f7f7f7'; ctx.fillRect(x,y,size,size);
+    ctx.fillStyle='#9a9a9a'; ctx.font=`${Math.max(10,Math.floor(size/12))}px sans-serif`;
+    ctx.textAlign='center'; ctx.fillText('Load image', cx, cy); ctx.restore();
+  }
+}
+function fillRoundedRect(x,y,w,h,r){ const {tl=0,tr=0,br=0,bl=0}=r||{};
+  ctx.beginPath();
+  ctx.moveTo(x+tl,y); ctx.lineTo(x+w-tr,y); ctx.quadraticCurveTo(x+w,y,x+w,y+tr);
+  ctx.lineTo(x+w,y+h-br); ctx.quadraticCurveTo(x+w,y+h,x+w-br,y+h);
+  ctx.lineTo(x+bl,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-bl);
+  ctx.lineTo(x,y+tl); ctx.quadraticCurveTo(x,y,x+tl,y); ctx.closePath(); ctx.fill();
+}
+
+/* ----- render (composite) ----- */
+function render(reset=false){
+  const panelIn = parseFloat(UI.panelPreset.value) || BASE_PANEL_IN;
+  const flapPx  = inchesToPx(FLAP_IN);
+  const panelPx = inchesToPx(panelIn);
+  const jacketW = panelPx * 2;
+  const jacketH = panelPx + flapPx*2;
+
+  const discIn  = panelIn * DISC_RATIO;
+  const discPx  = inchesToPx(discIn);
+  const gapPx   = inchesToPx(GAP_IN);
+
+  // two discs to the right (jacket -> gap -> disc1 -> gap -> disc2)
+  const canvasW = jacketW + gapPx + discPx + gapPx + discPx;
+  const canvasH = Math.max(jacketH, discPx);
+
+  cv.width = canvasW; cv.height = canvasH;
+
+  // scale preview vs baseline that *includes two discs*
+  const basePanelPx = inchesToPx(BASE_PANEL_IN);
+  const baseDiscPx  = inchesToPx(BASE_PANEL_IN*DISC_RATIO);
+  const baseGapPx   = inchesToPx(GAP_IN);
+  const baseCompositeW = basePanelPx*2 + baseGapPx + baseDiscPx + baseGapPx + baseDiscPx;
+  const desiredW = BASE_PREVIEW_W * (canvasW / baseCompositeW);
+  const maxW = wrap.clientWidth;
+  const cssW = Math.min(desiredW, maxW);
+  cv.style.width = cssW + 'px';
+  cv.style.height='auto';
+  legend.style.width = cssW + 'px';
+
+  // jacket rects (touch)
+  const backR  = {x:0,        y:flapPx, w:panelPx, h:panelPx};
+  const frontR = {x:panelPx,  y:flapPx, w:panelPx, h:panelPx};
+
+  // disc positions — vertically centered with the jacket
+  const discY = Math.round((jacketH - discPx) / 2);
+  const disc1R = {x:jacketW + gapPx,            y:discY, size:discPx};
+  const disc2R = {x:jacketW + gapPx + discPx + gapPx, y:discY, size:discPx};
+
+  if(reset){ state.back.inited=false; state.front.inited=false; state.record.inited=false; }
+  ensureInit('back',  backImg,  backR.w,  backR.h);
+  ensureInit('front', frontImg, frontR.w, frontR.h);
+  ensureInit('record',discImg,  disc1R.size, disc1R.size); // drives both
+
+  // background
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvasW,canvasH);
+
+  // jacket
+  drawPanel(backImg,  'back',  backR.x,  backR.y,  backR.w,  backR.h);
+  drawPanel(frontImg, 'front', frontR.x, frontR.y, frontR.w, frontR.h);
+  ctx.fillStyle='#000';
+  const rPx = Math.min(inchesToPx(FLAP_RADIUS_IN), Math.floor(flapPx/2)-1);
+  fillRoundedRect(backR.x, 0,               backR.w, flapPx, {tl:rPx,tr:rPx,br:0,bl:0});
+  fillRoundedRect(backR.x, flapPx+panelPx,  backR.w, flapPx, {tl:0,tr:0,br:rPx,bl:rPx});
+
+  // records (second is an exact duplicate)
+  drawDisc(discImg, 'record', disc1R.x, disc1R.y, disc1R.size);
+  drawDisc(discImg, 'record', disc2R.x, disc2R.y, disc2R.size);
+
+  UI.sizeReadout.textContent =
+    `Export canvas: ${pxToIn(canvasW).toFixed(3)}" × ${pxToIn(canvasH).toFixed(3)}" @ 300 DPI • Panel: ${panelIn.toFixed(3)}" • Flaps: 0.25" • Disc: ${discIn.toFixed(3)}" ×2 • Gap: ${GAP_IN.toFixed(3)}"`;
+  UI.editingLabel.textContent = (
+    UI.editTarget.value==='back'  ? 'Jacket — Back'  :
+    UI.editTarget.value==='front' ? 'Jacket — Front' : 'Record — Disc'
+  );
+
+  render._geom = { backR, frontR, disc1R, disc2R, flapPx, panelPx, jacketW, discPx, canvasW };
+}
+
+/* fast repaint */
+function drawFrameOnly(){
+  const g = render._geom; if(!g) return;
+  const {backR,frontR,disc1R,disc2R,flapPx,panelPx} = g;
+
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+  drawPanel(backImg,'back',backR.x,backR.y,backR.w,backR.h);
+  drawPanel(frontImg,'front',frontR.x,frontR.y,frontR.w,frontR.h);
+  ctx.fillStyle='#000'; const rPx = Math.min(inchesToPx(FLAP_RADIUS_IN), Math.floor(flapPx/2)-1);
+  fillRoundedRect(backR.x,0,backR.w,flapPx,{tl:rPx,tr:rPx,br:0,bl:0});
+  fillRoundedRect(backR.x,flapPx+panelPx,backR.w,flapPx,{tl:0,tr:0,br:rPx,bl:rPx});
+  drawDisc(discImg,'record',disc1R.x,disc1R.y,disc1R.size);
+  drawDisc(discImg,'record',disc2R.x,disc2R.y,disc2R.size);
+}
+
+/* hit-testing (only the LEFT disc is editable) */
+function canvasPoint(ev){ const r=cv.getBoundingClientRect(); const s=cv.width/r.width; return {x:(ev.clientX-r.left)*s, y:(ev.clientY-r.top)*s}; }
+function pickTarget(pt){
+  const g=render._geom; if(!g) return null;
+  const {backR,frontR,disc1R}=g; // note: disc2 intentionally not selectable
+  if(pt.x>=backR.x && pt.x<backR.x+backR.w && pt.y>=backR.y && pt.y<backR.y+backR.h) return 'back';
+  if(pt.x>=frontR.x&& pt.x<frontR.x+frontR.w&& pt.y>=frontR.y&& pt.y<frontR.y+frontR.h) return 'front';
+  const cx=disc1R.x+disc1R.size/2, cy=disc1R.y+disc1R.size/2, r=disc1R.size/2;
+  const dx=pt.x-cx, dy=pt.y-cy; if((dx*dx+dy*dy)<=r*r) return 'record';
+  return null;
+}
+
+/* interactions (drag/zoom) */
+cv.addEventListener('mousedown',ev=>{
+  const pt=canvasPoint(ev); const hit=pickTarget(pt);
+  if(hit){
+    UI.editTarget.value=hit;
+    UI.editingLabel.textContent = hit==='back'?'Jacket — Back': hit==='front'?'Jacket — Front':'Record — Disc';
+    const img = hit==='back'?backImg: hit==='front'?frontImg: discImg;
+    if(img){ dragging={active:true,target:hit,startX:pt.x,startY:pt.y,startTx:state[hit].tx,startTy:state[hit].ty}; }
+  }
+});
+window.addEventListener('mouseup',()=>dragging.active=false);
+cv.addEventListener('mousemove',ev=>{
+  if(!dragging.active) return;
+  const pt=canvasPoint(ev); const k=dragging.target; const s=state[k];
+  s.tx=dragging.startTx+(pt.x-dragging.startX); s.ty=dragging.startTy+(pt.y-dragging.startY);
+  const g=render._geom; const img=k==='back'?backImg:k==='front'?frontImg:discImg;
+  const w = k==='record'? g.disc1R.size : g.backR.w;
+  const h = k==='record'? g.disc1R.size : g.backR.h;
+  clampTransform(k,img,w,h); drawFrameOnly();
+});
+cv.addEventListener('dblclick',()=>{ const k=UI.editTarget.value; state[k].zoom=1; state[k].inited=false; UI.zoomSlider.value='100.0'; render(); });
+
+/* zoom helpers (quantized to 2px) */
+function quantizeZoom2px(img, rectW, rectH, desiredZoom){
+  if(!img) return desiredZoom;
+  const baseScale = computeBaseScale(img, rectW, rectH);
+  const drawW0 = img.naturalWidth  * baseScale;      // width at 1.00
+  const drawWDesired = drawW0 * desiredZoom;
+  const k = Math.max(0, Math.round((drawWDesired - drawW0) / 2));   // 2px steps
+  const drawWQuant = drawW0 + k*2;
+  const zq = drawWQuant / drawW0;
+  return Math.min(Math.max(zq, ZOOM_MIN), ZOOM_MAX);
+}
+
+cv.addEventListener('wheel',ev=>{
+  const pt=canvasPoint(ev); const hit=pickTarget(pt); if(!hit) return; ev.preventDefault();
+  const s=state[hit]; const g=render._geom; const img=hit==='back'?backImg:hit==='front'?frontImg:discImg;
+  const w = hit==='record'? g.disc1R.size : g.backR.w;
+  const h = hit==='record'? g.disc1R.size : g.backR.h;
+
+  const desired = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s.zoom * (1 + Math.sign(ev.deltaY) * -0.01)));
+  const zq = quantizeZoom2px(img, w, h, desired);
+
+  const oldW = img.naturalWidth * s.baseScale * s.zoom;
+  const oldH = img.naturalHeight* s.baseScale * s.zoom;
+  s.zoom = zq;
+  const newW = img.naturalWidth * s.baseScale * s.zoom;
+  const newH = img.naturalHeight* s.baseScale * s.zoom;
+  s.tx -= (newW - oldW)/2; s.ty -= (newH - oldH)/2;
+  clampTransform(hit,img,w,h);
+
+  UI.zoomSlider.value = (s.zoom*100).toFixed(1);
+  drawFrameOnly();
+},{passive:false});
+
+UI.zoomSlider.addEventListener('input',()=>{
+  const k=UI.editTarget.value; const g=render._geom; const img=k==='back'?backImg:k==='front'?frontImg:discImg; const s=state[k];
+  const w = k==='record'? g.disc1R.size : g.backR.w;
+  const h = k==='record'? g.disc1R.size : g.backR.h;
+
+  const desired = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, (+UI.zoomSlider.value)/100));
+  const oldW = img ? img.naturalWidth * s.baseScale * s.zoom : 0;
+  const oldH = img ? img.naturalHeight* s.baseScale * s.zoom : 0;
+
+  const zq = quantizeZoom2px(img, w, h, desired);
+  s.zoom = zq;
+
+  const newW = img ? img.naturalWidth * s.baseScale * s.zoom : 0;
+  const newH = img ? img.naturalHeight* s.baseScale * s.zoom : 0;
+  s.tx -= (newW - oldW)/2; s.ty -= (newH - oldH)/2;
+  if(img) clampTransform(k,img,w,h);
+
+  UI.zoomSlider.value = (s.zoom*100).toFixed(1);
+  render();
+});
+
+UI.editTarget.addEventListener('change',()=>{
+  UI.editingLabel.textContent =
+    UI.editTarget.value==='back' ? 'Jacket — Back' :
+    UI.editTarget.value==='front' ? 'Jacket — Front' : 'Record — Disc';
+  UI.zoomSlider.value = (state[UI.editTarget.value].zoom*100).toFixed(1);
+});
+
+UI.panelPreset.addEventListener('change',()=>{ state.back.inited=false; state.front.inited=false; state.record.inited=false; render(true); });
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  const k=UI.editTarget.value; state[k].zoom=1; state[k].inited=false; UI.zoomSlider.value='100.0'; render();
+});
+
+/* export with embedded 300 DPI (pHYs) */
+function exportPNG300(){
+  const dataURL=cv.toDataURL('image/png');
+  const binStr=atob(dataURL.split(',')[1]); const bytes=new Uint8Array(binStr.length);
+  for(let i=0;i<bytes.length;i++) bytes[i]=binStr.charCodeAt(i);
+  function w32(a,o,v){a[o]=(v>>>24)&255;a[o+1]=(v>>>16)&255;a[o+2]=(v>>>8)&255;a[o+3]=v&255;}
+  function crc32(b,s,e){let c=~0;for(let i=s;i<e;i++){c^=b[i];for(let k=0;k<8;k++){c=(c>>>1)^(0xEDB88320&-(c&1));}}return(~c)>>>0;}
+  let p=8,ihEnd=-1,phys=-1;while(p<bytes.length){const L=(bytes[p]<<24)|(bytes[p+1]<<16)|(bytes[p+2]<<8)|bytes[p+3];const T=String.fromCharCode(bytes[p+4],bytes[p+5],bytes[p+6],bytes[p+7]);const E=p+8+L+4;if(T==='IHDR') ihEnd=E;if(T==='pHYs'){phys=p;break;}p=E;}
+  const ppm=Math.round(300/0.0254); const ph=new Uint8Array(4+4+9+4); w32(ph,0,9); ph.set([0x70,0x48,0x59,0x73],4); w32(ph,8,ppm); w32(ph,12,ppm); ph[16]=1; w32(ph,17,crc32(ph,4,17));
+  let out; if(phys!==-1){const L=(bytes[phys]<<24)|(bytes[phys+1]<<16)|(bytes[phys+2]<<8)|bytes[phys+3];const E=phys+8+L+4;out=new Uint8Array(bytes.length-(E-phys)+ph.length);out.set(bytes.slice(0,phys),0);out.set(ph,phys);out.set(bytes.slice(E),phys+ph.length);}
+  else{out=new Uint8Array(bytes.length+ph.length);out.set(bytes.slice(0,ihEnd),0);out.set(ph,ihEnd);out.set(bytes.slice(ihEnd),ihEnd+ph.length);}
+  const blob=new Blob([out],{type:'image/png'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mini_lp_combo_300dpi.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+document.getElementById('exportPNG').addEventListener('click', exportPNG300);
+
+/* resize */
+window.addEventListener('resize', ()=>{ render(); });
+
+/* initial render */
+render();
+</script>
+</body>
+</html>
