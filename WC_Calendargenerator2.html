@@ -131,12 +131,14 @@
       max-width: none;
     }
 
-    /* === TABLE HEADER CELLS === */
+    /* === TABLE HEADER CELLS MON TUES... === */
     table.calendar th {
       background-color: #619ca3;
       color: black;
-      font-size: 11px;
+      font-size: 14px;
       border: 2px solid #333;
+      padding-top: 3px;
+      padding-bottom: 2px;
     }
 
     /* === CALENDAR CELLS === */
@@ -286,8 +288,9 @@
 
     .square-cell .note-area {
       font-size: 11px;
-      line-height: 1.2em;
+      line-height: 1.5em;
       text-transform: none;
+      text-align: center; /* ← add this */
     }
 
     @media print {
@@ -420,6 +423,12 @@
         <option value="10pt">10 pt</option>
         <option value="11pt">11 pt</option>
         <option value="12pt">12 pt</option>
+        <option value="13pt">13 pt</option>
+        <option value="14pt">14 pt</option>
+        <option value="15pt">15 pt</option>
+        <option value="16pt">16 pt</option>
+        <option value="17pt">17 pt</option>
+        <option value="18pt">18 pt</option>
       </select>
 
       <label for="number-color">Number Color</label>
@@ -617,6 +626,9 @@ Each Line is an Event:
     const eventColor = eventColorInput.value;
     const numberColor = numberColorInput.value;
 
+    // NEW: day-number size = event size minus 2pt
+const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
+
     calendarBody.innerHTML = rows.map((week, rowIndex) => {
       return "<tr>" + week.map((cell, colIndex) => {
         const isTopBlank = rowIndex === 0 && cell === "";
@@ -625,7 +637,7 @@ Each Line is an Event:
         const style = isTopBlank ? `background-color:${lightColor};` : '';
         return `<td class="${cellClass}" style="${style}">
           <div class="square-cell" style="font-family:${fontFamily};">
-            <strong class="day-label" style="color:${numberColor};">${cell}</strong>
+          <strong class="day-label" style="color:${numberColor}; font-size:${numberSize}; font-family:${fontFamily};">${cell}</strong>
             <div class="note-area" contenteditable="true" spellcheck="false" style="font-size:${eventSize}; color:${eventColor}; font-family:${fontFamily};"></div>
           </div>
         </td>`;
@@ -635,7 +647,9 @@ Each Line is an Event:
     document.querySelectorAll("table.calendar th").forEach(th => {
       th.style.backgroundColor = headerColorInput.value;
       th.style.color = headerTextWhiteToggle.checked ? "#fff" : "#000";
+      th.style.fontFamily = fontSelect.value; // <- add this (optional)
     });
+
   }
 
   function updateCalendar() {
@@ -687,13 +701,13 @@ Each Line is an Event:
   showYearToggle.addEventListener("change", updateCalendar);
   startWeekSelect.addEventListener("change", updateCalendar);
   fontSelect.addEventListener("change", updateCalendar);
-  eventSizeInput.addEventListener("input", updateCalendar);
+  eventSizeInput.addEventListener("change", updateCalendar);
   eventColorInput.addEventListener("input", updateCalendar);
   numberColorInput.addEventListener("input", updateCalendar);
   landscapeSwitch.addEventListener("change", () => {
     document.body.classList.toggle("landscape-mode", landscapeSwitch.checked);
+    updateCalendar();
   });
-
   updateCalendar();
 
   // Font dropdown logic
