@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini LP Combo — Jacket + Record ×2 • PNG @ 300 DPI</title>
+<title></title>
 <style>
   :root{
     --ink:#1a1a1a;
@@ -11,13 +11,14 @@
     --panel:#ffffff;
     --muted:#666;
     --accent:#da3a81;    /* pink buttons */
+    
   }
   *{box-sizing:border-box}
   html,body{background:var(--bg);color:var(--ink);margin:0;overflow-x:hidden;width:100%}
   body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
 
   /* Header */
-  header{padding:18px 20px;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10;text-align:center}
+  header{padding:18px 20px;background:#fff;border-bottom:2px dashed #fdd310;position:sticky;top:0;z-index:10;text-align:center}
   header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
   header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
 
@@ -65,18 +66,21 @@
 </style>
 </head>
 <body>
-<header>
-    <header class="no-print" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; width: 100vw; margin-left: -40px;">
-    <img
-      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
-      class="logosmall"
-      loading="lazy"
-      decoding="async"
-      alt="Lemon Twilight logo">
-  </header>
-
+<header class="no-print" style="
+  display:flex;
+  flex-direction:column;   /* stack */
+  align-items:center;
+  gap:8px;                 /* space between logo and title */
+  margin:0 0 20px;
+  width:100%;
+">
+  <img
+    src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
+    class="logosmall"
+    loading="lazy"
+    decoding="async"
+    alt="Lemon Twilight logo">
   <h1>Mini LP Combo — Jacket + Record ×2</h1>
-  <div class="sub">Jacket (left; fixed 0.25″ flaps on back) + Two matching records (right) • Drag & Zoom • PNG @ 300 DPI</div>
 </header>
 
 <main>
@@ -143,7 +147,7 @@
     </section>
 
     <section class="card">
-      <h2>Preview <span class="pill">Editing: <b id="editingLabel">Jacket — Back</b></span></h2>
+      <h2>Preview <span class="pill">Editing: <br>Jacket (fixed 0.25″ flaps on back) + matching records (right) • Drag & Zoom<b id="editingLabel">Jacket — Back</b></span></h2>
       <div id="legend" class="legend">
         <span class="cap">Jacket</span>
         <span class="cap">Record ×2</span>
@@ -151,8 +155,13 @@
       <div class="previewWrap" id="previewWrap">
         <canvas id="cv" width="10" height="10" aria-label="print canvas"></canvas>
       </div>
-<p class="muted" style="text-align:center">Export the image. Cut out along the edge, then fold the black edge down (.25”). Depneding on margins you can fit 4 record sets of 1:6 per page.</p>
-    </section>
+
+    <p><Strong>Instructions:</Strong><br>
+     &nbsp;&nbsp;&nbsp;&nbsp;• Export the image (PNG @ 300 DPI)<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;• Cut out along the edge<br>
+    &nbsp; &nbsp;&nbsp;&nbsp;• Fold the black edge down (.25”). 
+     
+     <br><br>Depending  on your printers margins you can fit 4 record sets of 1:6 per page for print and cut with SiserJuliet.</p>    </section>
   </div>
 </main>
 
