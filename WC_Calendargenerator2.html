@@ -9,14 +9,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Darker+Grotesque:wght@300..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Edu+NSW+ACT+Cursive:wght@400..700&family=Edu+SA+Beginner:wght@400..700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IM+Fell+DW+Pica:ital@0;1&family=Just+Another+Hand&family=La+Belle+Aurore&family=Meddon&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Patrick+Hand&family=Playwrite+AU+SA:wght@100..400&family=Playwrite+HU:wght@100..400&family=Pompiere&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Chicle&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Chicle&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 
   <style>
     /* === GLOBAL BODY STYLING === */
@@ -53,6 +51,24 @@
       display: block;
       font-size: 13px;
       font-weight: bold;
+    }
+
+    /* holiday text next to number – normal case + spacing */
+    .day-label .holiday-text {
+      text-transform: none !important;
+      font-style: italic;
+      color: grey;
+      margin-left: 8px;
+      line-height: 1.2em !important;
+
+      display: inline-block;
+      vertical-align: center;
+
+      /* NEW — natural ellipsis behavior */
+      max-width: 80%;          /* ← adjustable, will auto-fit the day cell */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* === CONTROLS (Month/Year/Options) === */
@@ -117,6 +133,13 @@
       margin-top: 10px;
     }
 
+    /* === CALENDAR WRAPPER TO CENTER TABLE === */
+    #calendar-wrapper {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     /* === CALENDAR TABLE === */
     table.calendar {
       width: 100%;
@@ -156,7 +179,6 @@
       border: 2px solid #333;
       box-sizing: border-box;
     }
-
 
     .font-dropdown {
       position: relative;
@@ -200,7 +222,6 @@
       background-color: #f0f0f0;
     }
 
-
     /* === BLANK CELL CLASSES === */
     .top-blank {
       background-color: #cfe5e7;
@@ -216,6 +237,11 @@
       text-transform: none !important;
       font-size: 12px;
       line-height: 1.2em;
+    }
+
+    /* extra space between holiday text and first event */
+    .note-area.has-holiday > div:first-child {
+      margin-top: 4px;
     }
 
     .note-divider {
@@ -294,6 +320,12 @@
       text-align: center; /* ← add this */
     }
 
+    /* Force the calendar to always be at least the height of a 5-row month */
+table.calendar {
+  min-height: 600px;   /* adjust number if needed */
+}
+
+
     @media print {
       .no-print {
         display: none !important;
@@ -303,9 +335,24 @@
         outline: none !important;
       }
 
-      body {
+      html, body {
         margin: 0 !important;
         padding: 0 !important;
+        width: 100%;
+      }
+
+      /* center wrapper on page for both portrait & landscape */
+      #calendar-wrapper {
+        width: fit-content !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+      /* when in landscape mode, shrink to page width but stay centered */
+      body.landscape-mode table.calendar {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
       }
 
       .print-wrapper {
@@ -325,7 +372,6 @@
         margin-top: 0px;
       }
     }
-
 
     @page {
       margin: 0mm 0mm 0mm 0mm; /* top, right, bottom, left */
@@ -436,6 +482,22 @@
         <option value="18pt">18 pt</option>
       </select>
 
+      <!-- NEW: separate number size control -->
+      <label for="number-size">Number Size</label>
+      <select id="number-size">
+        <option value="8pt" selected>8 pt</option>
+        <option value="9pt">9 pt</option>
+        <option value="10pt">10 pt</option>
+        <option value="11pt">11 pt</option>
+        <option value="12pt">12 pt</option>
+        <option value="13pt">13 pt</option>
+        <option value="14pt">14 pt</option>
+        <option value="15pt">15 pt</option>
+        <option value="16pt">16 pt</option>
+        <option value="17pt">17 pt</option>
+        <option value="18pt">18 pt</option>
+      </select>
+
       <label for="number-color">Number Color</label>
       <input type="color" id="number-color" value="#000000">
 
@@ -447,10 +509,13 @@
 
   <h1 id="calendar-title"></h1>
 
-  <table class="calendar">
-    <thead><tr id="calendar-header-row"></tr></thead>
-    <tbody id="calendar-body"></tbody>
-  </table>
+  <!-- wrapper to center calendar in print/screen -->
+  <div id="calendar-wrapper">
+    <table class="calendar">
+      <thead><tr id="calendar-header-row"></tr></thead>
+      <tbody id="calendar-body"></tbody>
+    </table>
+  </div>
 
 
   <div class="no-print" style="margin:20px; color: #fdd310;">
@@ -492,7 +557,6 @@ Each Line is an Event:
 </div> <!-- Close .notes-box -->
 
 <footer class="footer-note">
-  Generated by lemontwilight.com
 </footer>
 
 
@@ -511,6 +575,7 @@ Each Line is an Event:
 
   const fontSelect = document.getElementById("font-select");
   const eventSizeInput = document.getElementById("event-size");
+  const numberSizeInput = document.getElementById("number-size"); // NEW
   const eventColorInput = document.getElementById("event-color");
   const numberColorInput = document.getElementById("number-color");
 
@@ -601,7 +666,7 @@ Each Line is an Event:
     const date = new Date(year, month, 1);
     const fontFamily = fontSelect.value;
     const monthName = monthNames[month];
-    calendarTitle.textContent = showYearToggle.checked ? `${monthName} ${year}` : `${monthName}`;
+    calendarTitle.textContent = showYearToggle.checked ? `${monthName} ${year}` : monthName;
     calendarTitle.style.fontFamily = fontFamily;
     updatePageMargin(fontFamily);
     updateHeaderCase(fontFamily);
@@ -630,9 +695,7 @@ Each Line is an Event:
     const eventSize = eventSizeInput.value;
     const eventColor = eventColorInput.value;
     const numberColor = numberColorInput.value;
-
-    // NEW: day-number size = event size minus 2pt
-const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
+    const numberSize = numberSizeInput ? numberSizeInput.value : (parseInt(eventSize, 10) - 1) + "pt"; // NEW
 
     calendarBody.innerHTML = rows.map((week, rowIndex) => {
       return "<tr>" + week.map((cell, colIndex) => {
@@ -642,7 +705,7 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
         const style = isTopBlank ? `background-color:${lightColor};` : '';
         return `<td class="${cellClass}" style="${style}">
           <div class="square-cell" style="font-family:${fontFamily};">
-          <strong class="day-label" style="color:${numberColor}; font-size:${numberSize}; font-family:${fontFamily};">${cell}</strong>
+          <strong class="day-label" data-day-number="${cell}" style="color:${numberColor}; font-size:${numberSize}; font-family:${fontFamily};">${cell}</strong>
             <div class="note-area" contenteditable="true" spellcheck="false" style="font-size:${eventSize}; color:${eventColor}; font-family:${fontFamily};"></div>
           </div>
         </td>`;
@@ -664,20 +727,59 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
   function applyBulkNotes() {
     const textarea = document.getElementById("bulk-notes");
     const lines = textarea.value.trim().split("\n");
-    const noteMap = new Map();
-    for (const line of lines) {
-      const parts = line.split(":");
+
+    const eventMap = new Map();
+    const holidayMap = new Map();
+
+    for (let rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+
+      let isHoliday = false;
+      let content = line;
+
+      // Check for holiday marker at start: H1: ..., H 1: ...
+      if (line[0].toUpperCase() === "H") {
+        isHoliday = true;
+        content = line.slice(1).trim();
+      }
+
+      const parts = content.split(":");
       if (parts.length < 2) continue;
+
       const day = parts[0].trim();
       const note = parts.slice(1).join(":").trim();
-      if (!noteMap.has(day)) noteMap.set(day, []);
-      noteMap.get(day).push(note);
+      if (!day) continue;
+
+      if (isHoliday) {
+        if (!holidayMap.has(day)) holidayMap.set(day, []);
+        holidayMap.get(day).push(note);
+      } else {
+        if (!eventMap.has(day)) eventMap.set(day, []);
+        eventMap.get(day).push(note);
+      }
     }
 
-    noteMap.forEach((notes, day) => {
+    // Reset labels to just their day number and clear existing notes
+    document.querySelectorAll("td").forEach(td => {
+      const label = td.querySelector(".day-label");
+      const noteArea = td.querySelector(".note-area");
+
+      if (label) {
+        const baseDay = label.getAttribute("data-day-number") || label.textContent.trim().split(/\s+/)[0];
+        label.textContent = baseDay;  // just the number
+      }
+      if (noteArea) {
+        noteArea.innerHTML = "";
+        noteArea.classList.remove("has-holiday");
+      }
+    });
+
+    // Apply regular events into note-area
+    eventMap.forEach((notes, day) => {
       const td = [...document.querySelectorAll("td")].find(td => {
         const label = td.querySelector(".day-label");
-        return label && label.textContent.trim() === day;
+        return label && label.getAttribute("data-day-number") === day;
       });
       if (td) {
         const noteArea = td.querySelector(".note-area");
@@ -692,31 +794,62 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
         }
       }
     });
+
+    // Apply holidays next to the calendar day number
+    holidayMap.forEach((notes, day) => {
+      const td = [...document.querySelectorAll("td")].find(td => {
+        const label = td.querySelector(".day-label");
+        return label && label.getAttribute("data-day-number") === day;
+      });
+      if (!td) return;
+
+      const label = td.querySelector(".day-label");
+      const noteArea = td.querySelector(".note-area");
+      if (!label) return;
+
+      const baseDay = label.getAttribute("data-day-number") || label.textContent.trim().split(/\s+/)[0];
+      const holidayText = notes.join(" / ");
+
+      // Build the label content: number + holiday span
+      label.textContent = ""; // clear any existing content (just in case)
+      const numberNode = document.createTextNode(baseDay);
+      label.appendChild(numberNode);
+
+      const span = document.createElement("span");
+      span.className = "holiday-text";
+      span.textContent = holidayText;
+
+      // make holiday text 2pt smaller than number
+      const numSize = numberSizeInput.value;     // e.g. "12pt"
+      const sizeNum = parseInt(numSize);         // -> 12
+      span.style.fontSize = (sizeNum - 3) + "pt";
+
+      label.appendChild(span);
+
+
+      // Mark note area so CSS can give extra space to the first event
+      if (noteArea && notes.length) {
+        noteArea.classList.add("has-holiday");
+      }
+    });
   }
 
   function clearCalendar() {
-    document.querySelectorAll(".note-area").forEach(div => div.innerHTML = "");
+    document.querySelectorAll("td").forEach(td => {
+      const label = td.querySelector(".day-label");
+      const noteArea = td.querySelector(".note-area");
+
+      if (noteArea) {
+        noteArea.innerHTML = "";
+        noteArea.classList.remove("has-holiday");
+      }
+
+      if (label) {
+        const baseDay = label.getAttribute("data-day-number") || label.textContent.trim().split(/\s+/)[0];
+        label.textContent = baseDay;
+      }
+    });
   }
-
-  // Lock/unlock the calendar's pixel size in landscape
-  function lockLandscapeSize() {
-    const table = document.querySelector('table.calendar');
-    if (!table) return;
-    const r = table.getBoundingClientRect();
-    table.style.setProperty('width',  Math.round(r.width)  + 'px', 'important');
-    table.style.setProperty('height', Math.round(r.height) + 'px', 'important');
-    table.style.setProperty('max-width', 'none', 'important');
-  }
-
-  function unlockLandscapeSize() {
-    const table = document.querySelector('table.calendar');
-    if (!table) return;
-    table.style.removeProperty('width');
-    table.style.removeProperty('height');
-    table.style.removeProperty('max-width');
-  }
-
-
 
   // Event listeners
   monthSelect.addEventListener("change", updateCalendar);
@@ -727,21 +860,15 @@ const numberSize = (parseInt(eventSize, 10) - 1) + "pt";
   startWeekSelect.addEventListener("change", updateCalendar);
   fontSelect.addEventListener("change", updateCalendar);
   eventSizeInput.addEventListener("change", updateCalendar);
+  if (numberSizeInput) {
+    numberSizeInput.addEventListener("change", updateCalendar); // NEW
+  }
   eventColorInput.addEventListener("input", updateCalendar);
   numberColorInput.addEventListener("input", updateCalendar);
   landscapeSwitch.addEventListener("change", () => {
     document.body.classList.toggle("landscape-mode", landscapeSwitch.checked);
-    updateCalendar(); // render first so sizes are final
-    if (landscapeSwitch.checked) {
-      // wait a tick so CSS applies, then lock current px size
-      requestAnimationFrame(() => requestAnimationFrame(lockLandscapeSize));
-    } else {
-      // back to portrait: restore responsive behavior
-      unlockLandscapeSize();
-    }
+    updateCalendar(); // re-render for layout change
   });
-
-
 
   updateCalendar();
 
