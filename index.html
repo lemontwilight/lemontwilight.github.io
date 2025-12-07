@@ -316,7 +316,7 @@
     });
   </script>
 
-  <!-- LOADS FUNKOOUTPUTDISPLAY.HTML ONCE -->
+  <!-- LOADS output_display_only.HTML ONCE -->
   <script>
     document.addEventListener("click", (e) => {
       if (!e.target.classList.contains("tab")) return;
@@ -327,7 +327,7 @@
       const funkoDiv = document.getElementById("funko");
       if (funkoDiv.dataset.loaded === "true") return;
 
-      fetch("FunkoOutputDisplay.html")
+      fetch("output_display_only.html")
         .then(res => res.text())
         .then(html => {
           funkoDiv.innerHTML = html;
