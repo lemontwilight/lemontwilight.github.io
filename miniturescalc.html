@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Miniature Scale Converter — 1:6 · 1:12 · 1:16</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --bg:#fff; --panel:#ffffff; --muted:#666; --accent:#da3a81;
+    --line:#e6e6e6; --tint:#da3a811a; --face:"Microsoft Elegant Black Font", "Times New Roman", Times, serif;
+    --input-yellow:#fffbe6; --input-yellow-border:#f4e08a; --input-yellow-focus:#ffeaa8;
+    --tint-yellow:#fff7cc; --tint-yellow-border:#ffe99e;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--ink);margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+
+  header{padding:18px 20px;background:#fff;border-bottom:2px dashed #fdd310;text-align:center}
+  header h1{margin:6px 0 0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
+  header .brand{display:flex;flex-direction:column;align-items:center;gap:6px}
+  header .brand img{width:250px;height:auto;display:block}
+
+  main{max-width:1100px;margin:18px auto 60px;padding:0 16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px}
+  .card h2{margin:0 0 8px;font-size:16px}
+  .tinted{background:var(--tint);border-color:#da3a8126}
+  .tinted-yellow{background:var(--tint-yellow);border-color:var(--tint-yellow-border)}
+  .pill{background:#f7f7f7;border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-weight:600}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  label{font-weight:700; font-size:13px; display:block; margin-bottom:6px}
+  input[type="text"]{
+    width:100%;padding:.7rem .8rem;border-radius:12px;
+    border:1px solid var(--input-yellow-border);
+    background:var(--input-yellow);
+    transition:box-shadow .15s,border-color .15s,background .15s;
+  }
+  input[type="text"]:focus{
+    outline:none;border-color:var(--accent);
+    background:var(--input-yellow-focus);
+    box-shadow:0 0 0 4px #da3a8130;
+  }
+  select{padding:.55rem .7rem;border-radius:12px;border:1px solid #ccc;background:#fff}
+
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .scale-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .radio-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #ddd;background:#fff;border-radius:999px;padding:8px 12px}
+  .hint{color:var(--muted);font-size:12px}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:13px;color:#444}
+  td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .badge{display:inline-block;background:#fff;border:1px solid #ddd;border-radius:999px;padding:4px 10px;font-size:12px}
+  @media (max-width:720px){ header .brand img{width:200px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp" alt="Lemon Twilight logo" loading="lazy" decoding="async">
+    <h1>Miniature Scale Converter</h1>
+  </div>
+  <span class="sub">Enter full-size → get miniature at 1:6, 1:12, or 1:16 (in & mm)</span>
+</header>
+
+<main>
+  <section class="card tinted-yellow">
+    <h2>Dimensions (full-size)</h2>
+    <div class="grid" style="margin-top:8px">
+      <div>
+        <label for="h">Height (ft/in supported)</label>
+        <input id="h" type="text" inputmode="decimal" placeholder='e.g. 5′ 10", 5ft 10 1/2in, 72", 3-6'>
+      </div>
+      <div>
+        <label for="w">Width (ft/in supported)</label>
+        <input id="w" type="text" inputmode="decimal" placeholder='e.g. 2′ 3", 27.5", 2-3'>
+      </div>
+      <div>
+        <label for="d">Depth (ft/in supported)</label>
+        <input id="d" type="text" inputmode="decimal" placeholder='e.g. 1′, 14 1/4", .75", 0-9'>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="row">
+        <strong>Scale:</strong>
+        <label class="radio-chip"><input type="radio" name="scale" value="6"> 1:6</label>
+        <label class="radio-chip"><input type="radio" name="scale" value="12" checked> 1:12</label>
+        <label class="radio-chip"><input type="radio" name="scale" value="16"> 1:16</label>
+      </div>
+      <div class="hint" style="margin-top:6px">
+        Examples accepted: <code>5' 10"</code>, <code>5ft 10 1/2in</code>, <code>3-6</code> (ft-in), <code>72"</code>, <code>1 3/4"</code>, <code>.75"</code>.  
+        Plain numbers without a unit are treated as <b>inches</b>. Rounded to 3 decimals (in) and 1 decimal (mm).
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 style="margin:0">Scaled Results</h2>
+      <span class="badge" id="scaleBadge">Current scale: 1:12</span>
+    </div>
+
+    <table aria-label="Results table">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Original (in)</th>
+          <th>Miniature (in)</th>
+          <th>Miniature (mm)</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+(() => {
+  const INCH_TO_MM = 25.4;
+
+  // Parse a number that may be: 3.5 | .75 | 1/2 | 3 1/2 | 3-1/2
+  function parseNumberLike(s){
+    if(!s) return 0;
+    s = String(s).trim().replace(/\u2013|\u2014/g,"-");
+    // decimal (allow leading dot)
+    if(/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(s)) return parseFloat(s);
+    // whole + fraction: "3 1/2" or "3-1/2"
+    let m = s.match(/^([+-]?\d+)[ -]+(\d+)\/(\d+)$/);
+    if(m){
+      const whole = parseFloat(m[1]);
+      const num = parseFloat(m[2]);
+      const den = parseFloat(m[3]) || 1;
+      return whole + (Math.sign(whole) || 1) * (num/den);
+    }
+    // pure fraction: "1/4" or "-3/8"
+    m = s.match(/^([+-]?\d+)\/(\d+)$/);
+    if(m){
+      const num = parseFloat(m[1]);
+      const den = parseFloat(m[2]) || 1;
+      return num/den;
+    }
+    const first = parseFloat(s);
+    return isNaN(first) ? 0 : first;
+  }
+
+  // Master: returns total inches from a flexible feet/inches string
+  function parseToInches(input){
+    if(!input) return 0;
+    let s = String(input).trim()
+      .replace(/\u2032/g,"'")      // prime → '
+      .replace(/\u2033/g,'"')      // double prime → "
+      .replace(/\u2013|\u2014/g,"-")
+      .toLowerCase();
+
+    if(!s) return 0;
+
+    // Case A: feet present (', ft, foot, feet) — inches optional
+    let m = s.match(/^([+-]?\d+(?:\.\d+)?)\s*(?:'|ft|foot|feet)\s*(.*)$/i);
+    if(m){
+      const feet = parseFloat(m[1]);
+      let rest = (m[2] || "").trim();
+      // strip trailing inch words/symbols if supplied
+      rest = rest.replace(/(?:"|in(?:ch(?:es)?)?)\s*$/i,'').trim();
+      // Handle feet-only e.g. "6ft"
+      const inches = rest ? parseNumberLike(rest) : 0;
+      return feet*12 + inches;
+    }
+
+    // Case B: pattern like 5-10 (treat as 5' 10")
+    m = s.match(/^([+-]?\d+(?:\.\d+)?)\s*-\s*(.+)$/);
+    if(m){
+      const feet = parseFloat(m[1]);
+      const inches = parseNumberLike(m[2]);
+      return feet*12 + inches;
+    }
+
+    // Case C: inches with unit symbol/word
+    m = s.match(/^(.+?)\s*(?:"|in(?:ch(?:es)?)?)\s*$/i);
+    if(m){
+      return parseNumberLike(m[1]);
+    }
+
+    // Case D: naked number → inches
+    return parseNumberLike(s);
+  }
+
+  const fmtInches = v => (Math.round(v*1000)/1000).toFixed(3);
+  const fmtMM     = v => (Math.round(v*10)/10).toFixed(1);
+
+  const inputs = {
+    h: document.getElementById('h'),
+    w: document.getElementById('w'),
+    d: document.getElementById('d')
+  };
+  const rowsEl = document.getElementById('rows');
+  const scaleRadios = Array.from(document.querySelectorAll('input[name="scale"]'));
+  const scaleBadge = document.getElementById('scaleBadge');
+
+  function getScaleDivisor(){
+    const sel = scaleRadios.find(r => r.checked);
+    const divisor = sel ? Number(sel.value) : 12;
+    return divisor > 0 ? divisor : 12;
+  }
+
+  function compute(){
+    const H = parseToInches(inputs.h.value);
+    const W = parseToInches(inputs.w.value);
+    const D = parseToInches(inputs.d.value);
+    const div = getScaleDivisor();
+
+    const dims = [
+      {label:'Height', original:H},
+      {label:'Width',  original:W},
+      {label:'Depth',  original:D},
+    ].map(x => {
+      const scaledIn = x.original / div;
+      const scaledMM = scaledIn * INCH_TO_MM;
+      return {label:x.label, original:x.original, scaledIn, scaledMM};
+    });
+
+    rowsEl.innerHTML = dims.map(d => `
+      <tr>
+        <td>${d.label}</td>
+        <td class="mono">${fmtInches(d.original)}</td>
+        <td class="mono">${fmtInches(d.scaledIn)}</td>
+        <td class="mono">${fmtMM(d.scaledMM)}</td>
+      </tr>
+    `.trim()).join('');
+
+    scaleBadge.textContent = 'Current scale: 1:' + div;
+  }
+
+  ['input','change'].forEach(ev => {
+    inputs.h.addEventListener(ev, compute);
+    inputs.w.addEventListener(ev, compute);
+    inputs.d.addEventListener(ev, compute);
+  });
+  scaleRadios.forEach(r => r.addEventListener('change', compute));
+
+  // Friendly seeds (edit/clear as you like)
+  inputs.h.value = `5' 10"`;
+  inputs.w.value = `2' 3"`;
+  inputs.d.value = `14 1/4"`;
+  compute();
+})();
+</script>
+</body>
+</html>
