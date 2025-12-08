@@ -89,6 +89,15 @@ h2 {
   margin-top: 2px;
   margin-bottom: 2px;
   font-size: 1.15em;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.container {
+  break-before: avoid;
+  page-break-before: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .credit-header {
@@ -132,6 +141,17 @@ h2 {
   #collection-controls {
     display: none !important;
   }
+
+  @media print {
+  body::before {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+}
+
 }
 
 </style>
