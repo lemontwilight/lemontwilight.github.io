@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Zonesun Foil Pencil Helper 184ct Upper/Lower with expressions</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --bg:#fff; --panel:#ffffff; --muted:#666; --accent:#da3a81;
+    --line:#e6e6e6; --tint:#da3a811a; --face:"Microsoft Elegant Black Font", "Times New Roman", Times, serif;
+    --input-yellow:#fffbe6; --input-yellow-border:#f4e08a; --input-yellow-focus:#ffeaa8;
+    --tint-yellow:#fff7cc; --tint-yellow-border:#ffe99e;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--ink);margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+
+  /* —— Header matches your aesthetic —— */
+  header{padding:18px 20px;background:#fff;border-bottom:2px dashed #fdd310;text-align:center}
+  header h1{margin:6px 0 0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
+  header .brand{display:flex;flex-direction:column;align-items:center;gap:6px}
+  header .brand img{width:250px;height:auto;display:block}
+
+  main{max-width:1100px;margin:18px auto 60px;padding:0 16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px}
+  .card h2{margin:0 0 8px;font-size:16px}
+  .muted{color:var(--muted)}
+  .tinted{background:var(--tint);border-color:#da3a8126}
+  .tinted-yellow{background:var(--tint-yellow);border-color:var(--tint-yellow-border)}
+
+  /* Inputs */
+  input[type="text"]{
+    width:100%;padding:.7rem .8rem;border-radius:12px;
+    border:1px solid var(--input-yellow-border);
+    background:var(--input-yellow);
+    transition:box-shadow .15s,border-color .15s,background .15s;
+  }
+  input[type="text"]::placeholder{color:#8c8c8c}
+  input[type="text"]:focus{
+    outline:none;border-color:var(--accent);
+    background:var(--input-yellow-focus);
+    box-shadow:0 0 0 4px #da3a8130;
+  }
+  select{padding:.55rem .7rem;border-radius:12px;border:1px solid #ccc;background:#fff}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .pill{background:#f7f7f7;border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-weight:600}
+
+  /* Load-order output panels */
+  .out-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .panel{border:1px dashed #d8d8d8;border-radius:12px;background:#fff;padding:10px}
+  .panel h3{margin:0 0 8px;font-size:14px;font-weight:800;color:var(--accent)}
+  .out{font-size:18px;letter-spacing:.08em;display:flex;flex-wrap:wrap;gap:6px; font-family:var(--face);}
+  .piece{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:6px 8px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;font-weight:700;font-family:var(--face)}
+  .piece img{height:22px;width:auto;display:block}
+  .bad{border-color:#c62828!important;color:#c62828!important}
+
+  /* Letters + Emojis combined section */
+  .top-summary{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .summary-pill{background:#fff;border:1px solid #ddd;border-radius:999px;padding:6px 10px}
+  .grid-letters{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:10px}
+  .cell{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+  .cell h3{margin:0 0 4px;font-size:14px;font-weight:800}
+  .cnt{font:700 13px/1.1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .ok{color:#0a5} .warn{color:#c62828}
+
+  /* Emoji tiles styled like letters */
+  .grid-emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:10px}
+  .emoji-cell{background:#fff;border:2px solid #cfd6df;border-radius:12px;padding:8px;text-align:center;cursor:pointer}
+  .emoji-cell:hover{border-color:var(--accent)}
+  .emoji-thumb{display:block;height:36px;width:auto;margin:6px auto 6px;object-fit:contain}
+  .emoji-cnt{font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin-top:2px}
+
+  /* Responsive: stack the two preview panels on small screens */
+  @media (max-width:720px){ .out-wrap{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp" alt="Lemon Twilight logo" loading="lazy" decoding="async">
+    <h1>Pencil Foil helper</h1>
+  </div>
+  <span class="sub">Zonesun Foil Pencil Helper 184ct Upper/Lower with expressions</span>
+</header>
+
+<main>
+  <!-- A) Load order first, tinted pink, with two panels -->
+  <section class="card tinted">
+    <h2 style="color:var(--accent);font-weight:800">Load order helper</h2>
+    <div class="out-wrap">
+      <div class="panel">
+        <h3>Normal view (left → right)</h3>
+        <div id="outNormal" class="out"></div>
+      </div>
+      <div class="panel">
+        <h3>Load order (right → left)</h3>
+        <div id="outReversed" class="out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B) Type phrase + options — entire card tinted yellow -->
+  <section class="card tinted-yellow">
+    <h2>Type your phrase</h2>
+    <input id="phrase" type="text" placeholder="e.g., HAPPY 10e BIRTHDAY 1e 2e 3e">
+    <div class="row" style="margin-top:8px">
+      <label class="pill"><input type="checkbox" id="forceCaps"> Force UPPERCASE</label>
+      <label class="pill"><input type="checkbox" id="ignoreUnsupported" checked> Ignore unsupported characters</label>
+
+      <!-- Font selector -->
+      <label class="pill" style="display:flex;align-items:center;gap:8px;background:#fff">
+        <span style="font-weight:800">Font</span>
+        <select id="fontSelect" title="Choose display font">
+          <option value='"Microsoft Elegant Black Font", "Times New Roman", Times, serif' selected>Microsoft Elegant Black (default)</option>
+          <option value='"Times New Roman", Times, serif'>Times New Roman</option>
+          <option value='Arial, Helvetica, sans-serif'>Arial</option>
+          <option value='"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC", "Microsoft Yahei", sans-serif'>PingFang SC</option>
+          <option value='Futura, "Futura PT", "Avenir Next", Avenir, sans-serif'>Futura</option>
+          <option value='-apple-system, BlinkMacSystemFont, "SF Pro Text","SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif'>Apple iOS System</option>
+          <option value='Roboto, "Noto Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif'>Android (Roboto)</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- C) Letters + Emojis in one box; “Using …” at the top -->
+  <section class="card">
+    <div class="top-summary">
+      <strong>Summary:</strong>
+      <span id="summary" class="summary-pill">Using 0 pieces · spacers: 0 · emoji types: 0</span>
+    </div>
+
+    <h2>Letters — remaining</h2>
+    <div id="grid" class="grid-letters"></div>
+
+    <h2 style="margin-top:16px">Emojis — click to insert (1 each)</h2>
+    <div id="emojiGrid" class="grid-emojis"></div>
+  </section>
+</main>
+
+<script>
+/* ——— Emoji URLs (1e…43e) ——— */
+const EMOJI_URL={
+  "1e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724088/1e.webp",
+  "2e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724082/2e.webp",
+  "3e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724086/3e.webp",
+  "4e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724080/4e.webp",
+  "5e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724083/5e.webp",
+  "6e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724076/6e.webp",
+  "7e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724085/7e.webp",
+  "8e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724097/8e.webp",
+  "9e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724093/9e.webp",
+  "10e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724094/10e.webp",
+  "11e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724091/11e.webp",
+  "12e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724095/12e.webp",
+  "13e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724089/13e.webp",
+  "14e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724098/14e.webp",
+  "15e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724091/15e.webp",
+  "16e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724096/16e.webp",
+  "17e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724094/17e.webp",
+  "18e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724076/18e.webp",
+  "19e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724086/19e.webp",
+  "20e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724086/20e.webp",
+  "21e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724082/21e.webp",
+  "22e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724089/22e.webp",
+  "23e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724081/23e.webp",
+  "24e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724085/24e.webp",
+  "25e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724078/25e.webp",
+  "26e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724084/26e.webp",
+  "27e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724079/27e.webp",
+  "28e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724092/28e.webp",
+  "29e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724097/29e.webp",
+  "30e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724098/30e.webp",
+  "31e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724092/31e.webp",
+  "32e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724096/32e.webp",
+  "33e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724093/33e.webp",
+  "34e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724094/34e.webp",
+  "35e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724090/35e.webp",
+  "36e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724095/36e.webp",
+  "37e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724090/37e.webp",
+  "38e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724083/38e.webp",
+  "39e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724087/39e.webp",
+  "40e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724083/40e.webp",
+  "41e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724087/41e.webp",
+  "42e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724080/42e.webp",
+  "43e":"https://res.cloudinary.com/dwsdvc5sd/image/upload/v1759724088/43e.webp"
+};
+
+/* ——— Inventory for letters/digits/punct ——— */
+const invUC={A:3,B:2,C:2,D:2,E:3,F:2,G:2,H:2,I:3,J:2,K:2,L:2,M:2,N:2,O:3,P:2,Q:2,R:2,S:2,T:2,U:3,V:2,W:2,X:2,Y:2,Z:2};
+const invLC={a:5,b:2,c:2,d:2,e:5,f:2,g:2,h:2,i:5,j:2,k:2,l:5,m:2,n:2,o:5,p:2,q:2,r:2,s:2,t:2,u:5,v:2,w:2,x:2,y:2,z:2};
+const invNum={"1":5,"2":2,"3":2,"4":2,"5":2,"6":2,"7":2,"8":2,"9":2,"0":5};
+const invPunc={".":3,",":1,"?":1,"/":2,":":1,";":1,"'":2,"!":1,"@":1,"$":1,"%":1,"&":1,"(":1,")":1,"-":2,"_":1,"¥":1,"♥":1," ":8};
+const BASE_INV=Object.assign({},invUC,invLC,invNum,invPunc);
+
+/* ——— Build letter grid ——— */
+const $grid=document.getElementById('grid');
+function renderLetterGrid(inv){
+  $grid.innerHTML='';
+  const order=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ',...'abcdefghijklmnopqrstuvwxyz',...'1234567890',
+    ".",",","?","/",":",";","'","!","@","$","%","&","(",")","-","_","¥","♥"," "];
+  for(const ch of order){
+    const cell=document.createElement('div'); cell.className='cell';
+    const h=document.createElement('h3'); h.textContent=ch===' ' ? 'space' : ch;
+    const cnt=document.createElement('div'); cnt.className='cnt'; cnt.id=`cnt-${ch===' ' ? 'space' : ch}`; cnt.textContent=inv[ch]??0;
+    cell.append(h,cnt); $grid.appendChild(cell);
+  }
+}
+
+/* ——— Emoji grid: image + green token ——— */
+const $emojiGrid=document.getElementById('emojiGrid');
+function renderEmojiGrid(){
+  $emojiGrid.innerHTML='';
+  Object.keys(EMOJI_URL).sort((a,b)=>Number(a)-Number(b)).forEach(tok=>{
+    const cell=document.createElement('div'); cell.className='emoji-cell'; cell.title=`Insert ${tok}`;
+    cell.onclick=()=>insertToken(tok);
+    const img=document.createElement('img'); img.className='emoji-thumb'; img.src=EMOJI_URL[tok]; img.alt=tok;
+    const label=document.createElement('div'); label.className='emoji-cnt'; label.id=`ecnt-${tok}`; label.textContent=tok; label.style.color='#0a5';
+    cell.append(img,label); $emojiGrid.appendChild(cell);
+  });
+}
+
+/* ——— Input parsing (letters / spaces / emoji tokens 1e…43e) ——— */
+const $phrase=document.getElementById('phrase');
+const $forceCaps=document.getElementById('forceCaps');
+const $ignore=document.getElementById('ignoreUnsupported');
+function insertToken(tok){
+  const el=$phrase, start=el.selectionStart??el.value.length, end=el.selectionEnd??el.value.length;
+  el.value = el.value.slice(0,start) + (start && el.value[start-1]!==' ' ? ' ' : '') + tok + (end<el.value.length && el.value[end]!==' ' ? ' ' : '') + el.value.slice(end);
+  el.focus(); el.selectionStart = el.selectionEnd = start + tok.length + ((start && el.value[start-1]!==' ')?1:0);
+  update();
+}
+function tokenize(str){
+  const out=[]; let i=0, s=str||'';
+  while(i<s.length){
+    if(/\d/.test(s[i])){ let j=i; while(j<s.length && /\d/.test(s[j])) j++; if(s[j]==='e'){ const num=s.slice(i,j); const t=num+'e'; if(Number(num)>=1&&Number(num)<=43){ out.push(t); i=j+1; continue; } } }
+    out.push(s[i]); i++;
+  }
+  return out;
+}
+
+/* ——— Render helpers for both panels ——— */
+function buildPieces(container, tokens, need){
+  container.innerHTML='';
+  tokens.forEach(t=>{
+    const span=document.createElement('span'); span.className='piece';
+    if(EMOJI_URL[t]){ const im=document.createElement('img'); im.src=EMOJI_URL[t]; im.alt=t; span.appendChild(im);
+      if(1-(need[t]||0)<0) span.classList.add('bad');
+    }else{ span.textContent = t===' ' ? '·' : t; if(((BASE_INV[t]||0)-(need[t]||0))<0) span.classList.add('bad'); }
+    container.appendChild(span);
+  });
+}
+
+/* ——— Reverse render & inventory updates ——— */
+const $outNormal=document.getElementById('outNormal');
+const $outReversed=document.getElementById('outReversed');
+const $summary=document.getElementById('summary');
+
+function update(){
+  let raw=$phrase.value||'';
+  if($forceCaps.checked){ raw = raw.replace(/\d{1,2}e/g,m=>m).replace(/(?!\d{1,2}e)./g,c=>c.toUpperCase()); }
+  let toks=tokenize(raw);
+  if($ignore.checked){ toks = toks.filter(t => (t in EMOJI_URL) || (t.length===1 && (t in BASE_INV))); }
+
+  const need={}; toks.forEach(t=>need[t]=(need[t]||0)+1);
+
+  // Normal (left→right) and Reversed (right→left)
+  buildPieces($outNormal, toks, need);
+  buildPieces($outReversed, [...toks].reverse(), need);
+
+  // Update letter counts
+  for(const k in BASE_INV){
+    const el=document.getElementById(`cnt-${k===' ' ? 'space' : k}`); if(!el) continue;
+    const rem=(BASE_INV[k]||0)-(need[k]||0); el.textContent=rem; el.className='cnt '+(rem<0?'warn':'ok');
+  }
+  // Update emoji labels (keep token text; color shows availability)
+  Object.keys(EMOJI_URL).forEach(tok=>{
+    const el=document.getElementById(`ecnt-${tok}`); if(!el) return;
+    const rem=1-(need[tok]||0);
+    el.textContent=tok;
+    el.style.color = rem<0 ? '#c62828' : '#0a5';
+  });
+
+  const spacerCount=need[' ']||0;
+  const emojiUsed=Object.keys(need).filter(k=>EMOJI_URL[k]).length;
+  $summary.innerHTML=`Using <b>${toks.length}</b> pieces · spacers: <b>${spacerCount}</b> · emoji types: <b style="color:var(--accent)">${emojiUsed}</b>`;
+}
+
+/* ——— Font selector (updates CSS variable used by outputs) ——— */
+document.getElementById('fontSelect').addEventListener('change', (e)=>{
+  document.documentElement.style.setProperty('--face', e.target.value);
+  update();
+});
+
+/* ——— Boot ——— */
+renderLetterGrid(BASE_INV);
+renderEmojiGrid();
+update();
+document.getElementById('forceCaps').addEventListener('change',update);
+document.getElementById('ignoreUnsupported').addEventListener('change',update);
+document.getElementById('phrase').addEventListener('input',update);
+</script>
+</body>
+</html>
