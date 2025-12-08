@@ -239,6 +239,8 @@
     </p>
   </div>
 
+
+    <!-- Projects TAB CONTENT -->
   <div id="projects" class="tab-content">
     <h2>Other Projects</h2>
     <p>Things I’m working on…</p>
@@ -248,18 +250,36 @@
     </h3>
 
     <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin-top:20px; align-items:flex-start;">
+      
 
+        <!-- Large Calendar -->
       <div style="width:200px; text-align:center;">
         <a href="http://www.lemontwilight.com/WC_Calendargenerator2.html" target="_blank" rel="noopener noreferrer">
           <img
-            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1754446586/calendargenerator2.webp"
+            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1765162187/LargeCalendar.webp
+Moved LargeCalendar.webp"
             alt="Calendar Preview"
             style="width:100%; height:200px; object-fit:cover; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:block; margin:0 0 10px;">
         </a>
         <a href="http://www.lemontwilight.com/WC_Calendargenerator2.html"
            target="_blank" rel="noopener noreferrer"
            class="tab-link" style="display:block;">
-          Make a Calendar
+          Monthly Calendar <br>
+        </a>
+      </div>
+
+      <!-- Day Calendar -->
+      <div style="width:200px; text-align:center;">
+        <a href="http://www.lemontwilight.com/WC_Calendargenerator2.html" target="_blank" rel="noopener noreferrer">
+          <img
+            src="https://res.cloudinary.com/dwsdvc5sd/image/upload/v1765161661/calendardayviewonly.webp"
+            alt="Calendar Preview"
+            style="width:100%; height:200px; object-fit:cover; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:block; margin:0 0 10px;">
+        </a>
+        <a href="http://www.lemontwilight.com/WC_Calendargenerator2.html"
+           target="_blank" rel="noopener noreferrer"
+           class="tab-link" style="display:block;">
+          At a Glance Calendar <br> (month or year)
         </a>
       </div>
 
@@ -316,26 +336,132 @@
     });
   </script>
 
-  <!-- LOADS output_display_only.HTML ONCE -->
-  <script>
-    document.addEventListener("click", (e) => {
-      if (!e.target.classList.contains("tab")) return;
+<!-- LOADS output_display_only.HTML ONCE (FULL CHECKLIST RESTORE) -->
+<script>
+function loadFunkoOnce() {
+  const funkoDiv = document.getElementById("funko");
+  if (funkoDiv.dataset.loaded === "true") return;
 
-      const tab = e.target.dataset.tab;
-      if (tab !== "funko") return;
+fetch("output_display_only.html?v=" + Date.now())
+    .then(res => res.text())
+    .then(html => {
+      funkoDiv.innerHTML = html;
+      funkoDiv.dataset.loaded = "true";
 
-      const funkoDiv = document.getElementById("funko");
-      if (funkoDiv.dataset.loaded === "true") return;
+      // ✅ RE-ATTACH CHECKLIST FUNCTIONALITY
+      setupFunkoChecklist();
+    })
+    .catch(err => console.error("Funko load error:", err));
+}
 
-      fetch("output_display_only.html")
-        .then(res => res.text())
-        .then(html => {
-          funkoDiv.innerHTML = html;
-          funkoDiv.dataset.loaded = "true";
-        })
-        .catch(err => console.error("Funko load error:", err));
+// ✅ THIS IS THE CHECKLIST ENGINE (RESTORED)
+function setupFunkoChecklist() {
+  const cards = document.querySelectorAll('#funko .figure-box[data-record]');
+  const owned = new Set();
+
+  const outputBox = document.getElementById("ownedListOutput");
+  const inputBox  = document.getElementById("ownedListInput");
+  const loadBtn   = document.getElementById("loadFromText");
+  const downloadBtn = document.getElementById("downloadOwned");
+  const uploadInput = document.getElementById("uploadOwned");
+
+  function rebuildOwnedList() {
+    let lines = [];
+    owned.forEach(id => {
+      const card = document.querySelector(`.figure-box[data-record="${id}"]`);
+      if (!card) return;
+      const box  = card.getAttribute("data-box") || "";
+      const name = card.getAttribute("data-name") || "";
+      lines.push(`${id} | ${box} | ${name}`);
     });
-  </script>
+    lines.sort();
+    outputBox.value = lines.join("\n");
+  }
+
+  function applyOwned(list) {
+    owned.clear();
+    list.forEach(line => {
+      if (!line) return;
+      const id = line.split("|")[0].trim();
+      if (id) owned.add(id);
+    });
+
+    cards.forEach(card => {
+      const id = card.getAttribute("data-record");
+      if (owned.has(id)) {
+        card.classList.add("owned");
+      } else {
+        card.classList.remove("owned");
+      }
+    });
+
+    rebuildOwnedList();
+  }
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const id = card.getAttribute("data-record");
+      if (!id) return;
+
+      if (owned.has(id)) {
+        owned.delete(id);
+        card.classList.remove("owned");
+      } else {
+        owned.add(id);
+        card.classList.add("owned");
+      }
+
+      rebuildOwnedList();
+    });
+  });
+
+  loadBtn.addEventListener("click", () => {
+    const lines = inputBox.value.split("\n").map(l => l.trim()).filter(l => l);
+    applyOwned(lines);
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    const text = outputBox.value;
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "owned_funkos.txt";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  });
+
+  uploadInput.addEventListener("change", function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const lines = e.target.result.split("\n").map(l => l.trim()).filter(l => l);
+      inputBox.value = e.target.result;
+      applyOwned(lines);
+    };
+    reader.readAsText(file);
+  });
+}
+
+// ✅ CLICK LOAD
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("tab") && e.target.dataset.tab === "funko") {
+    loadFunkoOnce();
+  }
+});
+
+// ✅ AUTO LOAD ON REFRESH IF HASH IS #funko
+window.addEventListener("DOMContentLoaded", () => {
+  const hash = window.location.hash.replace("#", "");
+  if (hash === "funko") {
+    loadFunkoOnce();
+  }
+});
+</script>
 
 </body>
 </html>
