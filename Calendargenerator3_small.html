@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Heart Calendar</title>
+
+<!-- export png library-->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Rubik&family=Indie+Flower&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Darker+Grotesque:wght@300..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Edu+NSW+ACT+Cursive:wght@400..700&family=Edu+SA+Beginner:wght@400..700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IM+Fell+DW+Pica:ital@0;1&family=Just+Another+Hand&family=La+Belle+Aurore&family=Meddon&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Patrick+Hand&family=Playwrite+AU+SA:wght@100..400&family=Playwrite+HU:wght@100..400&family=Pompiere&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Chicle&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --day-header-bg: transparent;
+  --heart-color: #ff3ca6;
+  --number-color: #000000;
+}
+
+/* Global */
+body {
+  font-family: 'Asap', sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 30px;
+}
+
+
+
+
+/* YEAR TITLE */
+#year-title {
+  margin: 10px 0 15px 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+/* Container */
+#calendars-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+}
+
+/* Year view = 3 columns */
+body.year-mode #calendars-container {
+  display: grid !important;
+  grid-template-columns: repeat(3, 200px) !important;
+  justify-content: center !important;
+  gap: 6px !important;     /* your spacing */
+  column-gap: 30px !important;
+  row-gap: 12px !important;
+}
+
+
+.calendar-block {
+  min-width: 200px;
+  max-width: 200px;
+  text-align: center;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Month label */
+.month-label {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* TABLE */
+table.calendar {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0 auto;
+}
+
+/* DAY HEADERS */
+table.calendar th {
+  background-color: var(--day-header-bg);
+  font-size: 13px;
+  padding: 3px 0;
+  width: 30px;
+  box-sizing: border-box;
+  border-right: none;
+}
+
+table.calendar th:nth-child(1),
+table.calendar th:nth-child(7) {
+  width: 26px;
+}
+
+body.header-dividers-on table.calendar th:not(:last-child) {
+  border-right: 2px solid white;
+}
+
+/* DATE CELLS */
+table.calendar td {
+  width: 22px;
+  height: 22px;
+  padding: 1px;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Day numbers */
+.day-number {
+  position: relative;
+  z-index: 4;
+  font-weight: bold;
+  display: block;
+}
+
+/* Heart overlay */
+.heart-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-51%, -45%) scaleY(0.70) scaleX(0.90);
+  font-size: 2.4em;
+  line-height: 1;
+  color: var(--heart-color);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  font-weight: 900;
+}
+.day-cell.has-heart .heart-overlay {
+  opacity: 1;
+}
+.day-cell.has-heart .day-number {
+  color: var(--heart-color);
+}
+
+/* CONTROLS */
+.controls label,
+.controls select,
+.controls input {
+  font-size: 11px;
+  margin: 0 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  
+}
+
+
+.controls {
+  margin-bottom: 10px;
+}
+
+/* FONT DROPDOWN */
+.font-dropdown {
+  position: relative;
+  width: 165px;
+  display: inline-block;
+}
+.font-dropdown .selected {
+  padding: 3px 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: white;
+  font-size: 12px;
+}
+.font-dropdown .options {
+  display: none;
+  position: absolute;
+  width: 100%;
+  border: 1px solid #ccc;
+  background: white;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.font-dropdown .option {
+  padding: 4px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+.font-dropdown .option:hover {
+  background: #f0f0f0;
+}
+
+/* NO PRINT */
+.no-print {}
+
+
+/* view logo sizew */
+header img.logosmall {
+  max-width: 180px;   /* change this number to taste */
+  height: auto;
+}
+
+
+/* PRINT RULES */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    padding: 10px;
+  }
+  header img.logosmall {
+    max-width: 125px !important;
+  }
+
+  #year-title {
+    display: block !important;
+    font-size: 28px !important;
+    margin-bottom: 20px !important;
+  }
+  table.calendar {
+    table-layout: fixed !important;
+  }
+}
+
+/* FORCE PRINT MODE FOR PNG EXPORT */
+.force-print .no-print { display: none !important; }
+.force-print header img.logosmall { max-width: 132px !important; }
+.force-print body { padding: 10px !important; }
+.force-print #year-title {
+  display: block !important;
+  font-size: 28px !important;
+  margin-bottom: 20px !important;
+}
+.force-print table.calendar { table-layout: fixed !important; }
+
+
+#showYearContainer {
+  display: inline-block;
+}
+
+
+
+/* Header colors for the year view differnt color per row --day-header-bg */
+:root {
+  --row2-header: #cfe5e7;
+  --row3-header: #cfe5e7;
+  --row4-header: #cfe5e7;
+}
+
+
+/* Row 1 = your EXISTING --day-header-bg */
+body.year-mode .calendar-block:nth-child(1) th,
+body.year-mode .calendar-block:nth-child(2) th,
+body.year-mode .calendar-block:nth-child(3) th {
+  background-color: var(--day-header-bg);
+}
+
+body.year-mode .calendar-block:nth-child(4) th,
+body.year-mode .calendar-block:nth-child(5) th,
+body.year-mode .calendar-block:nth-child(6) th {
+  background-color: var(--row2-header);
+}
+
+body.year-mode .calendar-block:nth-child(7) th,
+body.year-mode .calendar-block:nth-child(8) th,
+body.year-mode .calendar-block:nth-child(9) th {
+  background-color: var(--row3-header);
+}
+
+body.year-mode .calendar-block:nth-child(10) th,
+body.year-mode .calendar-block:nth-child(11) th,
+body.year-mode .calendar-block:nth-child(12) th {
+  background-color: var(--row4-header);
+}
+
+
+
+/* Hide Row 2–4 controls in SINGLE month view */
+body:not(.year-mode) #year-row-colors {
+  display: none !important;
+}
+
+#year-row-colors {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+
+#calendar-wrapper {
+  display: inline-block;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- PNG EXPORT + PRINT WRAPPER -->
+<div id="calendar-wrapper">
+
+  <!-- LOGO INSIDE WRAPPER (IMPORTANT FOR EXPORT) -->
+  <header>
+    <img
+      src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp"
+      class="logosmall"
+      alt="Lemon Twilight Logo">
+  </header>
+<!-- CONTROLS body (DO NOT PRINT / DO NOT EXPORT) -->
+<div class="controls no-print">
+<label>Full Year</label>
+<input type="checkbox" id="view-toggle">
+
+  <br>
+
+  <label>Month:</label>
+  <select id="month"></select>
+
+  <label>Year:</label>
+  <select id="year"></select>
+
+  <label>Week Start:</label>
+  <select id="start-week">
+    <option value="sun">Sunday</option>
+    <option value="mon">Monday</option>
+  </select>
+
+<br>
+  <!-- font selector -->
+  <label>Font:</label>
+  <div class="font-dropdown" id="fontDropdown">
+    <div class="selected" id="selectedFont" data-value="'Asap', sans-serif">Asap</div>
+    <div class="options" id="fontOptions">
+          <div class="option" data-value="'Arial', sans-serif" style="font-family: Arial, sans-serif;">Arial</div>
+          <div class="option" data-value="'Asap', sans-serif" style="font-family: 'Asap', sans-serif;">Asap</div>
+          <div class="option" data-value="'Caladea', serif" style="font-family: 'Caladea', serif;">Caladea</div>
+          <div class="option" data-value="'Crimson Text', serif" style="font-family: 'Crimson Text', serif;">Crimson Text</div>
+          <div class="option" data-value="'Darker Grotesque', sans-serif" style="font-family: 'Darker Grotesque', sans-serif;">Darker Grotesque</div>
+          <div class="option" data-value="'EB Garamond', serif" style="font-family: 'EB Garamond', serif;">EB Garamond</div>
+          <div class="option" data-value="'Edu NSW ACT Cursive', cursive" style="font-family: 'Edu NSW ACT Cursive', cursive;">Edu NSW ACT Cursive</div>
+          <div class="option" data-value="'Edu SA Beginner', cursive" style="font-family: 'Edu SA Beginner', cursive;">Edu SA Beginner</div>
+          <div class="option" data-value="'IBM Plex Sans', sans-serif" style="font-family: 'IBM Plex Sans', sans-serif;">IBM Plex Sans</div>
+          <div class="option" data-value="'IM Fell DW Pica', serif" style="font-family: 'IM Fell DW Pica', serif;">IM Fell DW Pica</div>
+          <div class="option" data-value="'Just Another Hand', cursive" style="font-family: 'Just Another Hand', cursive;">Just Another Hand</div>
+          <div class="option" data-value="'La Belle Aurore', cursive" style="font-family: 'La Belle Aurore', cursive;">La Belle Aurore</div>
+          <div class="option" data-value="'Meddon', cursive" style="font-family: 'Meddon', cursive;">Meddon</div>
+          <div class="option" data-value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Montserrat</div>
+          <div class="option" data-value="'Patrick Hand', cursive" style="font-family: 'Patrick Hand', cursive;">Patrick Hand</div>
+          <div class="option" data-value="'Playwrite AU SA', sans-serif" style="font-family: 'Playwrite AU SA', sans-serif;">Playwrite AU SA</div>
+          <div class="option" data-value="'Playwrite HU', sans-serif" style="font-family: 'Playwrite HU', sans-serif;">Playwrite HU</div>
+          <div class="option" data-value="'Pompiere', cursive" style="font-family: 'Pompiere', cursive;">Pompiere</div>
+          <div class="option" data-value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif;">Raleway</div>
+          <div class="option" data-value="'Cal Sans', sans-serif" style="font-family:'Cal Sans', sans-serif;">Cal Sans</div>
+          <div class="option" data-value="'Chicle', cursive" style="font-family: 'Chicle', cursive;">Chicle</div>
+    </div> 
+  </div>
+
+    <!-- font size selector -->
+  <select id="number-size">
+    <option selected>10pt</option>
+    <option>12pt</option>
+    <option>14pt</option>
+    <option>16pt</option>
+    <option>18pt</option>
+  </select>
+  <input type="color" id="number-color" value="#000000">
+
+    <!-- day selected heart color selector -->
+  <label>Heart Color</label>
+  <input type="color" id="heart-color" value="#ff3ca6">
+
+   <!-- group for header information -->
+  <div>
+    <label>Header Color</label>
+  <input type="checkbox" id="bg-toggle" checked>
+  <input type="color" id="bg-color" value="#cfe5e7">
+
+    <!-- header colors for QTR2-4 -->
+  <input type="hidden" id="font-select" value="'Asap', sans-serif">
+  <div id="year-row-colors">
+    <!-- header colors these colors override everything even over the css -->
+<div id="year-row-colors">
+<label>Row 2</label><input type="color" id="row2-color" value="#cfe5e7">
+<label>Row 3</label><input type="color" id="row3-color" value="#cfe5e7">
+<label>Row 4</label><input type="color" id="row4-color" value="#cfe5e7">
+</div>
+
+
+</div>
+<!-- show year in header for single view toggle -->
+  <div id="showYearContainer">
+  <label>Show Year</label>
+  <input type="checkbox" id="show-year-single" checked>
+</div>
+<!-- show dividers toggle -->
+    <label>Dividers</label>
+  <input type="checkbox" id="header-dividers" checked>
+</div>
+
+
+  <button id="exportPNG" class="no-print">EXPORT PNG</button>
+</div>
+<br>
+  <!-- YEAR TITLE -->
+  <h1 id="year-title"></h1>
+
+  <!-- CALENDAR GRID -->
+  <div id="calendars-container"></div>
+
+</div>
+
+<script>
+/* JS Selectors ELEMENTS */
+const monthSelect = document.getElementById("month");
+const yearSelect = document.getElementById("year");
+const viewToggle = document.getElementById("view-toggle"); // ✅ TOGGLE
+const startWeekSelect = document.getElementById("start-week");
+
+const calendarsContainer = document.getElementById("calendars-container");
+const yearTitle = document.getElementById("year-title");
+
+const bgToggle = document.getElementById("bg-toggle");
+const bgColorInput = document.getElementById("bg-color");
+const numberSizeInput = document.getElementById("number-size");
+const numberColorInput = document.getElementById("number-color");
+const heartColorInput = document.getElementById("heart-color");
+const showYearSingle = document.getElementById("show-year-single");
+const headerDividerToggle = document.getElementById("header-dividers");
+
+const fontSelectHidden = document.getElementById("font-select");
+const fontDropdown = document.getElementById("fontDropdown");
+const selectedFont = document.getElementById("selectedFont");
+const fontOptions = document.getElementById("fontOptions");
+
+/* Row header colors */
+const row2Color = document.getElementById("row2-color");
+const row3Color = document.getElementById("row3-color");
+const row4Color = document.getElementById("row4-color");
+
+const monthNames = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
+
+const daysSunLetters = ["S","M","T","W","T","F","S"];
+const daysMonLetters = ["M","T","W","T","F","S","S"];
+
+const markedDays = new Set();
+function keyFor(y,m,d){ return `${y}-${m+1}-${d}`; }
+
+/* Month + year selects */
+for (let i=0;i<12;i++){
+  let o=document.createElement("option");
+  o.value=i; o.textContent=monthNames[i];
+  monthSelect.appendChild(o);
+}
+
+const now=new Date();
+monthSelect.value=now.getMonth();
+
+for(let y=now.getFullYear()-40;y<=now.getFullYear()+40;y++){
+  let o=document.createElement("option");
+  o.value=y; o.textContent=y;
+  yearSelect.appendChild(o);
+}
+yearSelect.value=now.getFullYear();
+
+/* Build month grid */
+function createMonthBlock(year, monthIndex, dayLabels) {
+  const block=document.createElement("div");
+  block.className="calendar-block";
+
+  const header=document.createElement("div");
+  header.className="month-label";
+
+  if (viewToggle.checked) {
+    header.textContent = monthNames[monthIndex];
+  } else {
+    header.textContent = showYearSingle.checked
+      ? `${monthNames[monthIndex]} ${year}`
+      : monthNames[monthIndex];
+  }
+  header.style.fontFamily = fontSelectHidden.value;
+  block.appendChild(header);
+
+  const table=document.createElement("table");
+  table.className="calendar";
+
+  const thead=document.createElement("thead");
+  const tr=document.createElement("tr");
+  dayLabels.forEach(d=>{
+    const th=document.createElement("th");
+    th.textContent=d;
+    th.style.fontFamily = fontSelectHidden.value;
+    tr.appendChild(th);
+  });
+  thead.appendChild(tr);
+  table.appendChild(thead);
+
+  const tbody=document.createElement("tbody");
+
+  const first=new Date(year,monthIndex,1);
+  const daysInMonth=new Date(year,monthIndex+1,0).getDate();
+  const monday=startWeekSelect.value==="mon";
+  const offset=monday?((first.getDay()+6)%7):first.getDay();
+
+  let day=1;
+  const rows=[];
+
+  let row=new Array(7).fill("");
+  for(let i=offset;i<7;i++) row[i]=day++;
+  rows.push(row);
+
+  while(day<=daysInMonth){
+    row=new Array(7).fill("");
+    for(let i=0;i<7 && day<=daysInMonth;i++) row[i]=day++;
+    rows.push(row);
+  }
+
+  rows.forEach(week=>{
+    const tr=document.createElement("tr");
+    week.forEach(cell=>{
+      const td=document.createElement("td");
+      if(cell!==""){
+        td.classList.add("day-cell");
+        td.dataset.year=year;
+        td.dataset.monthIndex=monthIndex;
+        td.dataset.day=cell;
+
+        const num=document.createElement("span");
+        num.className="day-number";
+        num.textContent=cell;
+        num.style.fontSize=numberSizeInput.value;
+        num.style.color=numberColorInput.value;
+        num.style.fontFamily = fontSelectHidden.value;
+        td.appendChild(num);
+
+        const heart=document.createElement("div");
+        heart.className="heart-overlay";
+        heart.textContent="♡";
+        td.appendChild(heart);
+
+        const k=keyFor(year,monthIndex,cell);
+        if(markedDays.has(k)) td.classList.add("has-heart");
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  block.appendChild(table);
+  return block;
+}
+
+/* Year title logic */
+function updateYearTitle() {
+  if (viewToggle.checked) {
+    yearTitle.textContent = yearSelect.value;
+    yearTitle.style.display="block";
+    yearTitle.style.fontFamily = fontSelectHidden.value;
+  } else {
+    yearTitle.style.display="none";
+  }
+}
+
+/* Header divider toggle */
+function updateHeaderDividers() {
+  document.body.classList.toggle("header-dividers-on", headerDividerToggle.checked);
+}
+
+function updateShowYearVisibility() {
+  const container = document.getElementById("showYearContainer");
+  container.style.display = (!viewToggle.checked) ? "inline-block" : "none";
+}
+
+/* Render */
+function render() {
+  calendarsContainer.innerHTML="";
+
+  const year=parseInt(yearSelect.value);
+  const monthIndex=parseInt(monthSelect.value);
+  const isYear = viewToggle.checked;
+
+  const dayLabels=startWeekSelect.value==="mon"?daysMonLetters:daysSunLetters;
+  document.body.classList.toggle("year-mode", isYear);
+
+  if (!isYear) {
+    calendarsContainer.appendChild(createMonthBlock(year,monthIndex,dayLabels));
+  } else {
+    for(let i=0;i<12;i++){
+      calendarsContainer.appendChild(createMonthBlock(year,i,dayLabels));
+    }
+  }
+
+  attachDayClicks();
+  updateHeaderColor();
+  updateHeartColor();
+  updateYearTitle();
+  updateShowYearVisibility();
+}
+
+/* Clicking dates */
+function attachDayClicks() {
+  document.querySelectorAll(".day-cell").forEach(cell=>{
+    cell.onclick=()=>{
+      const y=cell.dataset.year;
+      const m=cell.dataset.monthIndex;
+      const d=cell.dataset.day;
+      const k=keyFor(y,m,d);
+
+      if(cell.classList.contains("has-heart")){
+        markedDays.delete(k);
+        cell.classList.remove("has-heart");
+      } else {
+        markedDays.add(k);
+        cell.classList.add("has-heart");
+      }
+    };
+  });
+}
+
+/* Header BG toggle */
+function updateHeaderColor(){
+  document.documentElement.style.setProperty(
+    "--day-header-bg",
+    bgToggle.checked ? bgColorInput.value : "transparent"
+  );
+}
+
+/* Heart color */
+function updateHeartColor(){
+  document.documentElement.style.setProperty("--heart-color", heartColorInput.value);
+}
+
+/* Number color */
+numberColorInput.oninput = ()=>{
+  document.documentElement.style.setProperty("--number-color", numberColorInput.value);
+  render();
+};
+
+/* ✅ LISTENERS */
+viewToggle.onchange = render;
+monthSelect.onchange=render;
+yearSelect.onchange=render;
+startWeekSelect.onchange=render;
+numberSizeInput.onchange=render;
+bgToggle.onchange=updateHeaderColor;
+bgColorInput.oninput=updateHeaderColor;
+heartColorInput.oninput=updateHeartColor;
+showYearSingle.onchange=render;
+headerDividerToggle.addEventListener("change", updateHeaderDividers);
+
+row2Color.oninput = ()=>document.documentElement.style.setProperty("--row2-header", row2Color.value);
+row3Color.oninput = ()=>document.documentElement.style.setProperty("--row3-header", row3Color.value);
+row4Color.oninput = ()=>document.documentElement.style.setProperty("--row4-header", row4Color.value);
+
+/* FONT DROPDOWN */
+selectedFont.onclick=()=>{
+  fontOptions.style.display = fontOptions.style.display==="block"?"none":"block";
+};
+
+document.addEventListener("click", e=>{
+  if(!fontDropdown.contains(e.target)){
+    fontOptions.style.display="none";
+  }
+});
+
+document.querySelectorAll("#fontOptions .option").forEach(opt=>{
+  opt.onclick=()=>{
+    const value=opt.dataset.value;
+    selectedFont.textContent=opt.textContent;
+    selectedFont.style.fontFamily=value;
+    fontSelectHidden.value=value;
+    fontOptions.style.display="none";
+    render();
+  };
+});
+
+/* START */
+updateHeaderColor();
+updateHeartColor();
+updateHeaderDividers();
+
+/* ✅ FORCE row 2–4 headers to sync with picker values on load */
+document.documentElement.style.setProperty("--row2-header", row2Color.value);
+document.documentElement.style.setProperty("--row3-header", row3Color.value);
+document.documentElement.style.setProperty("--row4-header", row4Color.value);
+
+render();
+
+
+/* PNG EXPORT */
+document.getElementById("exportPNG").addEventListener("click", () => {
+  const wrapper = document.getElementById("calendar-wrapper");
+
+  document.body.classList.add("force-print");
+
+  html2canvas(wrapper, {
+    scale: 8,
+    backgroundColor: null,
+    useCORS: true
+  }).then(canvas => {
+    document.body.classList.remove("force-print");
+    const link = document.createElement("a");
+    link.download = "calendar.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+});
+</script>
+
+
+
+</body>
+</html>
