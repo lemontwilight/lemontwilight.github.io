@@ -89,15 +89,6 @@ h2 {
   margin-top: 2px;
   margin-bottom: 2px;
   font-size: 1.15em;
-  break-after: avoid;
-  page-break-after: avoid;
-}
-
-.container {
-  break-before: avoid;
-  page-break-before: avoid;
-  page-break-inside: avoid;
-  break-inside: avoid;
 }
 
 .credit-header {
@@ -141,17 +132,6 @@ h2 {
   #collection-controls {
     display: none !important;
   }
-
-  @media print {
-  body::before {
-    display: none !important;
-  }
-
-  body {
-    background: white !important;
-  }
-}
-
 }
 
 </style>
@@ -4857,21 +4837,41 @@ h2 {
           </div>
         </div>
         </div>
-<div style="width: 100%; text-align: center; margin-top: 15px;">
-  <h3 style="margin: 4px 0; font-size: 14px;">Owned List (auto-updating)</h3>
+<div id="collection-controls" style="
+  width: 100%;
+  max-width: 520px;
+  margin: 20px auto;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fafafa;
+  text-align: center;
+">
+
+  <h3 style="margin: 6px 0; font-size: 14px;">Owned List (auto-updating)</h3>
   <textarea id="ownedListOutput"
-            style="width: 90%; height: 120px; font-size: 12px; margin-bottom: 10px;"></textarea>
+    style="width: 100%; height: 100px; font-size: 12px; margin-bottom: 10px;"></textarea>
 
-  <h3 style="margin: 4px 0; font-size: 14px;">Paste Previous Owned List</h3>
+  <h3 style="margin: 6px 0; font-size: 14px;">Paste / Upload Owned List</h3>
   <textarea id="ownedListInput"
-            style="width: 90%; height: 120px; font-size: 12px; margin-bottom: 10px;"></textarea>
-  <button id="loadFromText" style="padding: 4px 8px;">Load From Text</button>
+    style="width: 100%; height: 100px; font-size: 12px; margin-bottom: 10px;"></textarea>
 
-  <button id="downloadOwned" style="padding: 4px 8px; margin-right: 6px;">Download owned list</button>
-  <label style="cursor:pointer;">
-    <span style="border: 1px solid #ccc; padding: 3px 6px; border-radius: 4px;">Upload owned list</span>
+  <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    <!-- keep load button for JS, but hide it -->
+    <button id="loadFromText" style="display:none;">Load From Text</button>
+
+    <button id="downloadOwned" style="padding: 6px 14px; border-radius: 6px; border: 1px solid #999; background: #fff; cursor: pointer; font-size: 12px;">
+      Download
+    </button>
+
     <input type="file" id="uploadOwned" accept=".txt" style="display:none;">
-  </label>
+    <button type="button"
+            onclick="document.getElementById('uploadOwned').click();"
+            style="padding: 6px 14px; border-radius: 6px; border: 1px solid #999; background: #fff; cursor: pointer; font-size: 12px;">
+      Upload
+    </button>
+  </div>
+
 </div>
 
 <div class="credit-banner">
@@ -4879,7 +4879,7 @@ h2 {
 </div>
 
 <script>
-(function(){{
+(function(){
 
   const cards = document.querySelectorAll('.figure-box[data-record]');
   const owned = new Set();
@@ -4890,64 +4890,64 @@ h2 {
   const downloadBtn = document.getElementById("downloadOwned");
   const uploadInput = document.getElementById("uploadOwned");
 
-  function rebuildOwnedList() {{
+  function rebuildOwnedList() {
     let lines = [];
-    owned.forEach(id => {{
-      const card = document.querySelector(`.figure-box[data-record="${{id}}"`);
+    owned.forEach(id => {
+      const card = document.querySelector(`.figure-box[data-record="${id}"]`);
       if (!card) return;
       const box = card.getAttribute("data-box") || "";
       const name = card.getAttribute("data-name") || "";
-      lines.push(`${{id}} | ${{box}} | ${{name}}`);
-    }});
+      lines.push(`${id} | ${box} | ${name}`);
+    });
     lines.sort();
     outputBox.value = lines.join("\n");
-  }}
+  }
 
-  function applyOwned(list) {{
+  function applyOwned(list) {
     owned.clear();
-    list.forEach(line => {{
+    list.forEach(line => {
       if (!line) return;
       const id = line.split("|")[0].trim();
       if (id) owned.add(id);
-    }});
+    });
 
-    cards.forEach(card => {{
+    cards.forEach(card => {
       const id = card.getAttribute("data-record");
-      if (owned.has(id)) {{
+      if (owned.has(id)) {
         card.classList.add("owned");
-      }} else {{
+      } else {
         card.classList.remove("owned");
-      }}
-    }});
+      }
+    });
 
     rebuildOwnedList();
-  }}
+  }
 
-  cards.forEach(card => {{
-    card.addEventListener('click', () => {{
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
       const id = card.getAttribute('data-record');
       if (!id) return;
 
-      if (owned.has(id)) {{
+      if (owned.has(id)) {
         owned.delete(id);
-        card.classList.remove('owned');
-      }} else {{
+        card.classList.remove("owned");
+      } else {
         owned.add(id);
-        card.classList.add('owned');
-      }}
+        card.classList.add("owned");
+      }
 
       rebuildOwnedList();
-    }});
-  }});
+    });
+  });
 
-  loadBtn.addEventListener('click', () => {{
+  loadBtn.addEventListener('click', () => {
     const lines = inputBox.value.split("\n").map(l => l.trim()).filter(l => l);
     applyOwned(lines);
-  }});
+  });
 
-  downloadBtn.addEventListener('click', () => {{
+  downloadBtn.addEventListener('click', () => {
     const text = outputBox.value;
-    const blob = new Blob([text], {{type: "text/plain"}});
+    const blob = new Blob([text], {type: "text/plain"});
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -4956,22 +4956,22 @@ h2 {
     a.click();
 
     URL.revokeObjectURL(url);
-  }});
+  });
 
-  uploadInput.addEventListener('change', function() {{
+  uploadInput.addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {{
+    reader.onload = (e) => {
       const lines = e.target.result.split("\n").map(l => l.trim()).filter(l => l);
       inputBox.value = e.target.result;
       applyOwned(lines);
-    }};
+    };
     reader.readAsText(file);
-  }});
+  });
 
-}})();
+})();
 </script>
 
 </body>
