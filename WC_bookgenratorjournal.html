@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reading Journal — 3×6 Export (masked covers, native-size templates, 300 DPI)</title>
+<style>
+  :root{
+    /* vinylrecords-style palette */
+    --ink:#1a1a1a; --bg:#fff; --panel:#ffffff; --muted:#666;
+    --accent:#da3a81; --line:#e6e6e6; --tint:#da3a811a;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--ink);margin:0;overflow-x:hidden}
+  body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+
+  header{padding:18px 20px;background:#fff;border-bottom:2px dashed #fdd310;text-align:center}
+  header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+  header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
+
+  main{max-width:1140px;margin:18px auto 60px;padding:0 16px}
+  .grid{display:grid;grid-template-columns:360px 760px;gap:16px;width:fit-content;margin-inline:auto}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .grid>section.card:first-of-type{background:var(--tint);border-color:#da3a8126}
+  .card h2{margin:0 0 8px;font-size:16px}
+  label{font-size:13px;color:var(--muted);display:block;margin:6px 0 4px}
+  small,.hint{color:var(--muted);font-size:.9rem}
+
+  .drop{border:1.6px dashed #bbb;border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:92px;background:#fcfcfc;cursor:pointer;text-align:center;padding:6px}
+  .drop.drag{border-color:#111}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .thumb img{width:100%;height:90px;object-fit:cover;display:block}
+  .thumb .idx{position:absolute;top:4px;left:6px;background:#0009;color:#fff;font-size:.75rem;padding:2px 6px;border-radius:999px}
+  .thumb .actions{display:flex;gap:4px;position:absolute;right:4px;top:4px}
+  .thumb button{font-size:.75rem;padding:2px 6px}
+
+  .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:transform .06s,box-shadow .06s}
+  .btn-primary{color:#fff;background:var(--accent);box-shadow:0 1px 0 rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.15)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.15)}
+  .btn-secondary{background:#f1f1f1;color:#111;border:1px solid #ddd}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .ok,.error{white-space:pre-wrap;padding:8px;border-radius:8px}
+  .ok{color:#0a5;background:#f1fff6;border:1px solid #bdeecf}
+  .error{color:#b00020;background:#fff3f3;border:1px solid #ffd3d3}
+
+  .previews{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .sheet{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .sheet h3{margin:0;padding:8px 10px;background:#eef2f7;border-bottom:1px solid #ddd;font-size:.95rem}
+  .sheet .stage{padding:10px}
+  canvas{width:100%;height:auto;display:block;border:1px dashed #e3e3e3;border-radius:8px;background:#f9fbff}
+
+  .legend{display:flex;justify-content:space-between;align-items:center;margin:6px 0 0;font-size:12px;color:#444}
+  .cap{background:#f5f5f5;border:1px solid #ddd;border-radius:999px;padding:3px 8px}
+</style>
+</head>
+<body>
+<header>
+  <img src="https://res.cloudinary.com/dwsdvc5sd/image/upload/f_auto,q_auto,w_250/lemontwilightlogo.webp" alt="Lemon Twilight logo" loading="lazy" decoding="async">
+  <h1>Reading Journal — 3×6 (Front covers + mirrored Inside)</h1>
+  <span class="sub">Drag to reposition • Mouse-wheel to zoom a single cover • Exports 300 DPI</span>
+</header>
+
+<main>
+  <div class="grid">
+    <!-- Controls -->
+    <section class="card">
+      <h2>1) Load covers</h2>
+      <div id="drop" class="drop"><div><strong>Drag & drop up to 18 covers</strong><br><small>or click to pick… (order is left→right, then next row)</small></div></div>
+      <input id="fileInput" type="file" accept="image/*" multiple hidden>
+      <div id="thumbs" class="thumbs"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button id="clearCovers" class="btn btn-secondary">Clear covers</button>
+      </div>
+
+
+      <h2 style="margin-top:14px;">2) Export</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="exportFront" class="btn btn-primary" disabled>Export Front PNG (300 DPI)</button>
+        <button id="exportBack"  class="btn btn-primary" disabled>Export Back PNG (300 DPI)</button>
+      </div>
+      <div id="links" style="display:grid;gap:6px;margin-top:8px"></div>
+    </section>
+
+    <!-- Previews -->
+    <section class="card">
+      <h2 style="margin:0 0 6px">Live preview</h2>
+      <div class="legend">
+        <span class="cap">Front (shows only loaded covers)</span>
+        <span class="cap">Back (mirrored columns, same count)</span>
+      </div>
+      <div class="previews">
+        <div class="sheet">
+          <h3>Front preview</h3>
+          <div class="stage"><canvas id="frontCanvas" width="2550" height="3300"></canvas></div>
+        </div>
+        <div class="sheet">
+          <h3>Back (inside) preview</h3>
+          <div class="stage"><canvas id="backCanvas" width="2550" height="3300"></canvas></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+/* ---------- Cloudinary PNGs ---------- */
+const FRONT_URL  = "https://res.cloudinary.com/dwsdvc5sd/image/upload/journalbookfront.png";
+const INSIDE_URL = "https://res.cloudinary.com/dwsdvc5sd/image/upload/journalbookback.png";
+
+/* ---------- Page & Grid (300 DPI) ---------- */
+const DPI = 300;
+const PAGE_W = 2550, PAGE_H = 3300;      // Letter @300
+const COLS = 3, ROWS = 6, COUNT = COLS*ROWS;
+
+/* Spacing. Margins are computed to center the native-size templates grid. */
+let MARGIN_X = 150, MARGIN_Y = 150;
+const GUTTER_X = 15, GUTTER_Y = 40;
+
+/* Card size will use the template's native pixels */
+let CELL_W = 0, CELL_H = 0;
+
+/* Helpers to position cells */
+const posX = (c) => MARGIN_X + c*(CELL_W + GUTTER_X);
+const posY = (r) => MARGIN_Y + r*(CELL_H + GUTTER_Y);
+
+
+// Export only the grid area (no page margins) at exact pixel size
+function exportGridOnly(srcCanvas, filename, count){
+  // how many rows are actually used (same for front/back)
+  const usedRows = Math.ceil(Math.max(1, count) / COLS);
+
+  // grid width uses ALL columns so front/back widths always match
+  const GRID_W = COLS * CELL_W + (COLS - 1) * GUTTER_X;
+  // grid height uses only the rows you filled
+  const GRID_H = usedRows * CELL_H + (usedRows - 1) * GUTTER_Y;
+
+  // make a tight output canvas (white background)
+  const out = document.createElement('canvas');
+  out.width  = GRID_W;
+  out.height = GRID_H;
+  const ctx = out.getContext('2d', { alpha: false });
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, GRID_W, GRID_H);
+
+  // copy the grid rect from the page canvas starting at (MARGIN_X, MARGIN_Y)
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(srcCanvas, MARGIN_X, MARGIN_Y, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+
+  downloadCanvasPNG300(out, filename); // keep your 300-dpi pHYs tagging
+}
+
+/* ---------- Yellow-band slot (mask) ---------- */
+/* Exact mask size (inches → px @300 DPI) */
+const SLOT_W_PX = Math.round(0.96  * DPI);   // your latest width
+const SLOT_H_PX = Math.round(1.417 * DPI);   // exact height per your spec
+/* Band anchor (as fraction of card). Adjust if the band sits differently in the PNG. */
+const SLOT_X_FRAC = 0.5101;
+const SLOT_Y_FRAC = 0.03;
+
+/* Tiny bleed under the mask to avoid a hairline gap */
+const BLEED_PX = 3; // grow cover 3px beyond mask on all sides (still clipped to mask)
+
+/* ---------- Zoom behavior (vinyl style) ---------- */
+const ZOOM_MIN = 1.00, ZOOM_MAX = 1.30;
+
+/* ---------- Elements ---------- */
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+const thumbs = document.getElementById('thumbs');
+const clearBtn = document.getElementById('clearCovers');
+const links = document.getElementById('links');
+const exportFrontBtn = document.getElementById('exportFront');
+const exportBackBtn  = document.getElementById('exportBack');
+
+const frontCanvas = document.getElementById('frontCanvas');
+const backCanvas  = document.getElementById('backCanvas');
+const fctx = frontCanvas.getContext('2d', {alpha:false});
+const bctx = backCanvas.getContext('2d', {alpha:false});
+
+/* ---------- Images ---------- */
+function loadImage(src){
+  return new Promise((res,rej)=>{
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = ()=>res(im);
+    im.onerror = ()=>rej(new Error("Failed to load "+src));
+    im.src = src;
+  });
+}
+let frontTpl = null, backTpl = null;
+
+/* Cards (one state per loaded cover) */
+let cards = []; // [{img, zoom, tx, ty, baseScale, inited}]
+
+/* Hover / Drag state */
+let hover = {page:'front', idx:-1};
+let drag  = {active:false, idx:-1, startX:0, startY:0, startTx:0, startTy:0};
+
+/* ---------- Layout from template native size ---------- */
+function initLayoutFromTemplate(){
+  CELL_W = frontTpl.naturalWidth;
+  CELL_H = frontTpl.naturalHeight;
+
+  const totalW = COLS * CELL_W + (COLS - 1) * GUTTER_X;
+  const totalH = ROWS * CELL_H + (ROWS - 1) * GUTTER_Y;
+
+  MARGIN_X = Math.max(0, Math.floor((PAGE_W - totalW) / 2));
+  MARGIN_Y = Math.max(0, Math.floor((PAGE_H - totalH) / 2));
+}
+
+/* ---------- Geometry & maths ---------- */
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function coverRectForCell(x, y, w, h) {
+  const sw = Math.min(SLOT_W_PX, w);
+  const sh = Math.min(SLOT_H_PX, h);
+
+  let sx = Math.round(x + w * SLOT_X_FRAC);
+  let sy = Math.round(y + h * SLOT_Y_FRAC);
+
+  // keep inside the card bounds
+  if (sx + sw > x + w) sx = x + w - sw;
+  if (sy + sh > y + h) sy = y + h - sh;
+
+  return { sx, sy, sw, sh };
+}
+function computeBaseScale(img, w, h){ return Math.max(w / img.naturalWidth, h / img.naturalHeight); }
+function quantizeZoom2px(img, slotW, desiredZoom, baseScale){
+  const drawW0 = img.naturalWidth * baseScale;          // width at zoom=1
+  const desired = drawW0 * desiredZoom;
+  const k = Math.max(0, Math.round((desired - drawW0) / 2)); // quantize 2px
+  const drawWQ = drawW0 + k*2;
+  return clamp(drawWQ / drawW0, ZOOM_MIN, ZOOM_MAX);
+}
+
+/* ---------- Rendering ---------- */
+function clearCanvas(ctx){
+  ctx.clearRect(0,0,PAGE_W,PAGE_H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,PAGE_W,PAGE_H);
+}
+
+function forEachPositionN(n, fn){
+  let i=0;
+  outer: for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(i>=n) break outer;
+      const x = posX(c), y = posY(r);
+      fn(i, r, c, x, y, CELL_W, CELL_H);
+      i++;
+    }
+  }
+}
+
+function redraw(){
+  clearCanvas(fctx); clearCanvas(bctx);
+  if(!frontTpl || !backTpl || CELL_W===0) return;
+
+  const n = cards.length;
+
+  // FRONT: for first n cells — cover clipped to slot, then template with hole
+  forEachPositionN(n, (i, r, c, x, y, w, h)=>{
+    const slot = coverRectForCell(x,y,w,h);
+
+    // BLEED rect (bigger drawing area, but we still clip to the slot)
+    const bslot = {
+      sx: slot.sx - BLEED_PX,
+      sy: slot.sy - BLEED_PX,
+      sw: slot.sw + 2*BLEED_PX,
+      sh: slot.sh + 2*BLEED_PX
+    };
+
+    const S = cards[i]; if(!S || !S.img) return;
+
+    // lazy init placement (use BLEED size so we fully cover the mask edges)
+    if(!S.inited){
+      S.baseScale = computeBaseScale(S.img, bslot.sw, bslot.sh);
+      const drawW = S.img.naturalWidth*S.baseScale*S.zoom;
+      const drawH = S.img.naturalHeight*S.baseScale*S.zoom;
+      S.tx = bslot.sx + (bslot.sw - drawW)/2;
+      S.ty = bslot.sy + (bslot.sh - drawH)/2;
+      S.inited = true;
+    }
+
+    // 1) COVER clipped to the exact mask (slot),
+    //    but the drawn image is sized/positioned vs the BLEED rect.
+    fctx.save();
+    fctx.beginPath(); fctx.rect(slot.sx, slot.sy, slot.sw, slot.sh); fctx.clip();
+    const dW = S.img.naturalWidth*S.baseScale*S.zoom;
+    const dH = S.img.naturalHeight*S.baseScale*S.zoom;
+    fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = 'high';
+    fctx.drawImage(S.img, S.tx, S.ty, dW, dH);
+    fctx.restore();
+
+    // 2) FRONT TEMPLATE with punched-out hole
+    const off = document.createElement('canvas'); off.width = w; off.height = h;
+    const octx = off.getContext('2d', {alpha:true});
+    octx.imageSmoothingEnabled = true; octx.imageSmoothingQuality = 'high';
+    octx.drawImage(frontTpl, 0, 0);                     // native size
+    octx.clearRect(slot.sx - x, slot.sy - y, slot.sw, slot.sh); // punch slot
+    fctx.drawImage(off, x, y);
+
+    // hover ring
+    if(hover.page==='front' && hover.idx===i){
+      fctx.strokeStyle='#da3a81'; fctx.lineWidth=4; fctx.setLineDash([10,6]);
+      fctx.strokeRect(slot.sx,slot.sy,slot.sw,slot.sh); fctx.setLineDash([]);
+    }
+  });
+
+// BACK: mirrored columns, first n cells only (template FORCED to front cell size)
+forEachPositionN(n, (i, r, c, x, y, w, h)=>{
+  const mc = (COLS-1) - c;
+  const mx = posX(mc);
+  bctx.imageSmoothingEnabled = true; bctx.imageSmoothingQuality = 'high';
+
+  // draw the back template scaled to EXACTLY the front cell rect
+  bctx.drawImage(
+    backTpl,
+    0, 0, backTpl.naturalWidth, backTpl.naturalHeight, // source (entire PNG)
+    mx, y, CELL_W, CELL_H                               // destination = front cell
+  );
+
+  if(hover.page==='back' && hover.idx===i){
+    bctx.strokeStyle='#da3a81'; bctx.lineWidth=4; bctx.setLineDash([10,6]);
+    bctx.strokeRect(mx,y,w,h); bctx.setLineDash([]);
+  }
+});
+
+  const ok = n>0;
+  exportFrontBtn.disabled = !ok;
+  exportBackBtn.disabled  = !ok;
+}
+
+/* ---------- Hit-testing / interaction on FRONT ---------- */
+function canvasPoint(canvas, ev){ const r=canvas.getBoundingClientRect(); const s=canvas.width/r.width; return {x:(ev.clientX-r.left)*s, y:(ev.clientY-r.top)*s}; }
+function pickFrontIndexAt(pt){
+  let i=0;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(i>=cards.length) return -1;
+      const slot = coverRectForCell(posX(c), posY(r), CELL_W, CELL_H);
+      if(pt.x>=slot.sx && pt.x<slot.sx+slot.sw && pt.y>=slot.sy && pt.y<slot.sy+slot.sh) return i;
+      i++;
+    }
+  }
+  return -1;
+}
+
+frontCanvas.addEventListener('mousemove', (ev) => {
+  if (!drag.active) {
+    const idx = pickFrontIndexAt(canvasPoint(frontCanvas, ev));
+    hover = {page:'front', idx};
+    redraw();
+    return;
+  }
+
+  // ----- DRAG handling with BLEED clamps -----
+  const pt = canvasPoint(frontCanvas, ev);
+  const S  = cards[drag.idx];
+  if (!S) return;
+
+  // find the slot for this index
+  let slot = null, i = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (i === drag.idx) { slot = coverRectForCell(posX(c), posY(r), CELL_W, CELL_H); break; }
+      i++;
+    }
+    if (slot) break;
+  }
+
+  // bleed rect
+  const bslot = { sx: slot.sx - BLEED_PX, sy: slot.sy - BLEED_PX, sw: slot.sw + 2*BLEED_PX, sh: slot.sh + 2*BLEED_PX };
+
+  const drawW = S.img.naturalWidth  * S.baseScale * S.zoom;
+  const drawH = S.img.naturalHeight * S.baseScale * S.zoom;
+
+  // clamp to BLEED rect
+  S.tx = clamp(drag.startTx + (pt.x - drag.startX), bslot.sx + bslot.sw - drawW, bslot.sx);
+  S.ty = clamp(drag.startTy + (pt.y - drag.startY), bslot.sy + bslot.sh - drawH, bslot.sy);
+
+  redraw();
+});
+
+frontCanvas.addEventListener('mouseleave', ()=>{hover.idx=-1; redraw();});
+
+frontCanvas.addEventListener('mousedown', (ev) => {
+  const pt=canvasPoint(frontCanvas,ev);
+  const idx=pickFrontIndexAt(pt);
+  if(idx<0) return;
+  const S=cards[idx];
+  drag = {active:true, idx, startX:pt.x, startY:pt.y, startTx:S.tx, startTy:S.ty};
+});
+window.addEventListener('mouseup', ()=>{ drag.active=false; });
+
+frontCanvas.addEventListener('wheel', (ev) => {
+  const pt  = canvasPoint(frontCanvas, ev);
+  const idx = pickFrontIndexAt(pt);
+  if (idx < 0) return;
+  ev.preventDefault();
+
+  const S = cards[idx];
+
+  // slot for this index
+  let slot = null, i = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (i === idx) { slot = coverRectForCell(posX(c), posY(r), CELL_W, CELL_H); break; }
+      i++;
+    }
+    if (slot) break;
+  }
+
+  // bleed rect
+  const bslot = { sx: slot.sx - BLEED_PX, sy: slot.sy - BLEED_PX, sw: slot.sw + 2*BLEED_PX, sh: slot.sh + 2*BLEED_PX };
+
+  // quantized zoom
+  const desired = clamp(S.zoom * (1 + Math.sign(ev.deltaY) * -0.01), ZOOM_MIN, ZOOM_MAX);
+  const zq      = quantizeZoom2px(S.img, bslot.sw, desired, S.baseScale);
+
+  const oldW = S.img.naturalWidth  * S.baseScale * S.zoom;
+  const oldH = S.img.naturalHeight * S.baseScale * S.zoom;
+
+  S.zoom = zq;
+
+  const newW = S.img.naturalWidth  * S.baseScale * S.zoom;
+  const newH = S.img.naturalHeight * S.baseScale * S.zoom;
+
+  // keep center while zooming
+  S.tx -= (newW - oldW) / 2;
+  S.ty -= (newH - oldH) / 2;
+
+  // clamp to BLEED rect
+  S.tx = clamp(S.tx, bslot.sx + bslot.sw - newW, bslot.sx);
+  S.ty = clamp(S.ty, bslot.sy + bslot.sh - newH, bslot.sy);
+
+  redraw();
+}, { passive: false });
+
+/* ---------- Back hover (visual only) ---------- */
+backCanvas.addEventListener('mousemove', ev=>{
+  const r=backCanvas.getBoundingClientRect(); const s=backCanvas.width/r.width;
+  const pt={x:(ev.clientX-r.left)*s,y:(ev.clientY-r.top)*s};
+  let idx=-1, i=0;
+  for(let rr=0; rr<ROWS; rr++){
+    for(let cc=0; cc<COLS; cc++){
+      if(i>=cards.length){ hover={page:'back',idx:-1}; redraw(); return; }
+      const x = posX((COLS-1)-cc), y = posY(rr);
+      if(pt.x>=x && pt.x<x+CELL_W && pt.y>=y && pt.y<y+CELL_H) idx=i;
+      i++;
+    }
+  }
+  hover={page:'back', idx}; redraw();
+});
+backCanvas.addEventListener('mouseleave', ()=>{hover.idx=-1; redraw();});
+
+/* ---------- Covers: add/clear and thumbnails ---------- */
+drop.addEventListener('click', ()=>fileInput.click());
+drop.addEventListener('dragover', e=>{e.preventDefault(); drop.classList.add('drag');});
+drop.addEventListener('dragleave', ()=>drop.classList.remove('drag'));
+drop.addEventListener('drop', async e=>{
+  e.preventDefault(); drop.classList.remove('drag');
+  const files=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')); await addFiles(files);
+});
+fileInput.addEventListener('change', async e=>{
+  const files=[...(e.target.files||[])]; await addFiles(files); fileInput.value='';
+});
+clearBtn.addEventListener('click', ()=>{ cards=[]; renderThumbs(); redraw(); });
+
+async function addFiles(files){
+  for(const f of files.slice(0, COUNT - cards.length)){
+    const url = await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); });
+    const img = await loadImage(url);
+    cards.push({img, zoom:1, tx:0, ty:0, baseScale:1, inited:false});
+  }
+  renderThumbs(); redraw();
+}
+function renderThumbs(){
+  thumbs.innerHTML='';
+  cards.forEach((c,i)=>{
+    const el=document.createElement('div'); el.className='thumb';
+    const im=document.createElement('img'); im.src=c.img.src; el.appendChild(im);
+    const idx=document.createElement('div'); idx.className='idx'; idx.textContent=i+1; el.appendChild(idx);
+    const acts=document.createElement('div'); acts.className='actions';
+    const up=document.createElement('button'); up.textContent='▲'; up.onclick=()=>{ if(i>0){ [cards[i-1],cards[i]]=[cards[i],cards[i-1]]; cards[i-1].inited=false; cards[i].inited=false; renderThumbs(); redraw(); } };
+    const dn=document.createElement('button'); dn.textContent='▼'; dn.onclick=()=>{ if(i<cards.length-1){ [cards[i+1],cards[i]]=[cards[i],cards[i+1]]; cards[i+1].inited=false; cards[i].inited=false; renderThumbs(); redraw(); } };
+    const rm=document.createElement('button'); rm.textContent='✕'; rm.onclick=()=>{ cards.splice(i,1); renderThumbs(); redraw(); };
+    acts.append(up,dn,rm); el.appendChild(acts); thumbs.appendChild(el);
+  });
+}
+
+
+// One set of bounds for BOTH pages, based purely on the grid positions
+function getUnifiedBounds(n){
+  if (n <= 0) return { sx:0, sy:0, sw:0, sh:0 };
+
+  // rows used
+  const lastRow = Math.floor((n - 1) / COLS);
+
+  // columns used: if we have at least COLS items, we used all columns
+  // otherwise we used only the first n columns in the first (only) row
+  const maxCol = (n >= COLS) ? (COLS - 1) : (n - 1);
+
+  // grid-aligned rectangle from first cell to the furthest used col/row
+  const left   = posX(0);
+  const top    = posY(0);
+  const right  = posX(maxCol) + CELL_W;
+  const bottom = posY(lastRow) + CELL_H;
+
+  // lock to integer pixels so front/back are identical
+  const sx = Math.max(0, Math.floor(left));
+  const sy = Math.max(0, Math.floor(top));
+  const ex = Math.min(PAGE_W, Math.ceil(right));
+  const ey = Math.min(PAGE_H, Math.ceil(bottom));
+
+  return { sx, sy, sw: ex - sx, sh: ey - sy };
+}
+
+// Crop ANY canvas to the given bounds (white background)
+function cropWithBounds(srcCanvas, bounds){
+  const { sx, sy, sw, sh } = bounds;
+  const out = document.createElement('canvas');
+  out.width  = Math.max(1, sw);
+  out.height = Math.max(1, sh);
+  const ctx = out.getContext('2d', { alpha:true });
+
+  ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+  return out;
+}
+
+
+
+/* ---------- Export @300 DPI (adds PNG pHYs) ---------- */
+function downloadCanvasPNG300(canvas, filename){
+  const dataURL = canvas.toDataURL('image/png');
+  const bin = atob(dataURL.split(',')[1]);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bytes.length;i++) bytes[i] = bin.charCodeAt(i);
+
+  function w32(a,o,v){ a[o]=(v>>>24)&255; a[o+1]=(v>>>16)&255; a[o+2]=(v>>>8)&255; a[o+3]=v&255; }
+  function crc32(b,s,e){ let c=~0; for(let i=s;i<e;i++){ c^=b[i]; for(let k=0;k<8;k++){ c=(c>>>1)^(0xEDB88320&-(c&1)); } } return (~c)>>>0; }
+
+  let p=8, ihEnd=-1, phys=-1;
+  while(p<bytes.length){
+    const L=(bytes[p]<<24)|(bytes[p+1]<<16)|(bytes[p+2]<<8)|bytes[p+3];
+    const T=String.fromCharCode(bytes[p+4],bytes[p+5],bytes[p+6],bytes[p+7]);
+    const E=p+8+L+4;
+    if(T==='IHDR') ihEnd=E;
+    if(T==='pHYs'){ phys=p; break; }
+    p=E;
+  }
+
+  const ppm = Math.round(300/0.0254); // 300 DPI in pixels-per-meter
+  const ph = new Uint8Array(4+4+9+4);
+  w32(ph,0,9); ph.set([0x70,0x48,0x59,0x73],4); w32(ph,8,ppm); w32(ph,12,ppm); ph[16]=1; w32(ph,17,crc32(ph,4,17));
+
+  let out;
+  if(phys!==-1){
+    const L=(bytes[phys]<<24)|(bytes[phys+1]<<16)|(bytes[phys+2]<<8)|bytes[phys+3];
+    const E=phys+8+L+4;
+    out=new Uint8Array(bytes.length-(E-phys)+ph.length);
+    out.set(bytes.slice(0,phys),0); out.set(ph,phys); out.set(bytes.slice(E),phys+ph.length);
+  }else{
+    out=new Uint8Array(bytes.length+ph.length);
+    out.set(bytes.slice(0,ihEnd),0); out.set(ph,ihEnd); out.set(bytes.slice(ihEnd),ihEnd+ph.length);
+  }
+
+  const blob = new Blob([out], {type:'image/png'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+exportFrontBtn.addEventListener('click', ()=>{
+  exportGridOnly(frontCanvas, 'reading-journal_front.png', cards.length);
+});
+exportBackBtn.addEventListener('click', ()=>{
+  exportGridOnly(backCanvas,  'reading-journal_back.png',  cards.length);
+});
+
+
+/* ---------- Boot ---------- */
+Promise.all([loadImage(FRONT_URL), loadImage(INSIDE_URL)]).then(([f,b])=>{
+  frontTpl=f; backTpl=b;
+  initLayoutFromTemplate();   // use template’s native pixels for card size
+  redraw();
+}).catch(err=>{
+  const s=document.getElementById('status'); s.className='error'; s.textContent='Could not load templates:\n'+err.message;
+});
+</script>
+
+</body>
+</html>
