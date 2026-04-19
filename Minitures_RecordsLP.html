@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title></title>
+<title>Mini LP Combo</title>
 <style>
   :root{
     --ink:#1a1a1a;
@@ -18,7 +18,6 @@
 
   header{padding:18px 20px;background:#fff;border-bottom:2px dashed #fdd310;position:sticky;top:0;z-index:10;text-align:center}
   header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
-  header .sub{margin-top:6px;display:inline-block;font-size:12px;color:#333;background:#ffffffb3;border:1px solid #fff;border-radius:999px;padding:4px 10px}
 
   main{max-width:1140px;margin:18px auto 60px;padding:0 16px}
   .grid{display:grid;grid-template-columns:360px 760px;gap:16px;width:fit-content;margin-left:auto;margin-right:auto}
@@ -60,7 +59,7 @@
 </style>
 </head>
 <body>
-<header class="no-print" style="
+<header style="
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -94,21 +93,11 @@
       <div class="drop" id="discDrop"><div><strong>Drop image</strong><br><small>or click to pick…</small></div></div>
       <input id="discFile" type="file" accept="image/*" hidden>
 
-      <h2 style="margin-top:14px;">2) Size & edit</h2>
-      <label>Jacket panel size (each panel is square; back flaps are always exactly 0.25″)</label>
-      <select id="panelPreset">
-        <optgroup label="1:6 scale (doll 12″ album look)">
-          <option value="1.50">1.50" — 1:6 7" single vibe (small prop)</option>
-          <option value="1.75">1.75" — 1:6 10" EP feel</option>
-          <option value="2.00" selected>2.00" — 1:6 12" LP (default)</option>
-          <option value="2.25">2.25" — oversized look</option>
-          <option value="2.50">2.50" — extra large display</option>
-        </optgroup>
-        <optgroup label="1:12 scale (half-size minis)">
-          <option value="1.00">1.00" — 1:12 12" LP</option>
-          <option value="0.875">0.875" — 1:12 10" EP (~7/8")</option>
-          <option value="0.625">0.625" — 1:12 7" single (5/8")</option>
-        </optgroup>
+      <h2 style="margin-top:14px;">2) Scale & edit</h2>
+      <label>Scale preset</label>
+      <select id="scalePreset">
+        <option value="1:6" selected>1:6 scale</option>
+        <option value="1:12">1:12 scale</option>
       </select>
 
       <div class="row" style="margin-top:10px">
@@ -128,18 +117,20 @@
 
       <div class="actions">
         <button id="resetBtn" class="btn btn-secondary">Reset selected</button>
-        <button id="exportPNG" class="btn btn-primary">Export Hi-Res PNG</button>
+        <button id="exportCover" class="btn btn-primary">Export Cover PNG</button>
+        <button id="exportRecord" class="btn btn-primary">Export Record PNG</button>
       </div>
 
       <div id="sizeReadout" class="size-readout"></div>
 
       <p class="notice">
-        Export uses an offscreen high-resolution canvas for sharper output while keeping the same layout and transparency.
+        Export makes separate cover and record PNGs with bleed included.
+        Use the exact inches shown below or in the filename when importing into Leonardo.
       </p>
     </section>
 
     <section class="card">
-      <h2>Preview <span class="pill">Editing: <br>Jacket (fixed 0.25″ flaps on back) + matching records (right) • Drag & Zoom <b id="editingLabel">Jacket — Back</b></span></h2>
+      <h2>Preview <span class="pill">Editing: <br>Jacket + matching records • Drag & Zoom <b id="editingLabel">Jacket — Back</b></span></h2>
       <div id="legend" class="legend">
         <span class="cap">Jacket</span>
         <span class="cap">Record ×2</span>
@@ -149,44 +140,38 @@
       </div>
 
       <p><strong>Instructions:</strong><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;• Export the image (Hi-Res PNG)<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;• Cut out along the edge<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;• Fold the black edge down (.25”).<br><br>
-      Depending on your printer’s margins you can fit 4 record sets of 1:6 per page for print and cut with Siser Juliet.
-      </p>
+      &nbsp;&nbsp;&nbsp;&nbsp;• Export Cover PNG and/or Record PNG<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;• Import into Leonardo<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;• Size to the inches shown in the filename/readout<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;• Cut and fold the black edge down (.25")</p>
     </section>
   </div>
 </main>
 
 <script>
-/* ========================
-   Mini LP Combo — Jacket + Record ×2
-   - Second record is an exact duplicate of the editable record (same art & transform)
-   - Hi-res export uses offscreen rendering
-   ======================== */
-
-/* ----- constants ----- */
 const DPI = 600;
-const EXPORT_SCALE = 4;   // offscreen export multiplier
+const EXPORT_SCALE = 4;
 const FLAP_IN = 0.25;
 const FLAP_RADIUS_IN = 0.06;
 const GAP_IN = 0.0625;
-const BASE_PANEL_IN = 2.00;
-const DISC_RATIO = 0.935;
+const BLEED_IN = 0.03;
 const BASE_PREVIEW_W = 720;
 
-/* slider/zoom bounds */
+const SCALE_PRESETS = {
+  "1:6":  { panel: 2.00, disc: 1.85 },
+  "1:12": { panel: 1.00, disc: 0.925 }
+};
+
 const ZOOM_MIN = 1.00;
 const ZOOM_MAX = 1.30;
 
-/* ----- globals & UI refs ----- */
 const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d', { alpha:true });
+const ctx = cv.getContext('2d', { alpha: true });
 const wrap = document.getElementById('previewWrap');
 const legend = document.getElementById('legend');
 
 const UI = {
-  panelPreset : document.getElementById('panelPreset'),
+  scalePreset : document.getElementById('scalePreset'),
   editTarget  : document.getElementById('editTarget'),
   zoomSlider  : document.getElementById('zoomSlider'),
   editingLabel: document.getElementById('editingLabel'),
@@ -194,14 +179,15 @@ const UI = {
 };
 
 let frontImg = null, backImg = null, discImg = null;
-const state = {
-  back:   { zoom:1, tx:0, ty:0, baseScale:1, inited:false },
-  front:  { zoom:1, tx:0, ty:0, baseScale:1, inited:false },
-  record: { zoom:1, tx:0, ty:0, baseScale:1, inited:false }
-};
-let dragging = { active:false, target:null, startX:0, startY:0, startTx:0, startTy:0 };
 
-/* ----- helpers ----- */
+const state = {
+  back:   { zoom: 1, tx: 0, ty: 0, baseScale: 1, inited: false },
+  front:  { zoom: 1, tx: 0, ty: 0, baseScale: 1, inited: false },
+  record: { zoom: 1, tx: 0, ty: 0, baseScale: 1, inited: false }
+};
+
+let dragging = { active: false, target: null, startX: 0, startY: 0, startTx: 0, startTy: 0 };
+
 const inchesToPx = i => Math.round(i * DPI);
 const pxToIn = px => px / DPI;
 
@@ -210,18 +196,22 @@ function setupDrop(areaId, fileId, assign){
   const inp = document.getElementById(fileId);
 
   area.addEventListener('click', () => inp.click());
+
   ['dragenter','dragover'].forEach(e => area.addEventListener(e, ev => {
     ev.preventDefault();
     area.classList.add('drag');
   }));
+
   ['dragleave','drop'].forEach(e => area.addEventListener(e, ev => {
     ev.preventDefault();
     area.classList.remove('drag');
   }));
+
   area.addEventListener('drop', ev => {
     const f = ev.dataTransfer.files?.[0];
     if (f) loadImg(f, assign, area);
   });
+
   inp.addEventListener('change', ev => {
     const f = ev.target.files?.[0];
     if (f) loadImg(f, assign, area);
@@ -259,9 +249,11 @@ function computeBaseScale(img, w, h){
 function ensureInit(key, img, w, h){
   const s = state[key];
   if (!img) return;
+
   s.baseScale = computeBaseScale(img, w, h);
   const W = img.naturalWidth * s.baseScale * s.zoom;
   const H = img.naturalHeight * s.baseScale * s.zoom;
+
   if (!s.inited) {
     s.tx = (w - W) / 2;
     s.ty = (h - H) / 2;
@@ -290,8 +282,52 @@ function quantizeZoom2px(img, rectW, rectH, desiredZoom){
   return Math.min(Math.max(zq, ZOOM_MIN), ZOOM_MAX);
 }
 
+function getGeometry(){
+  const scaleKey = UI.scalePreset.value;
+  const preset = SCALE_PRESETS[scaleKey];
+
+  const panelIn = preset.panel;
+  const discIn = preset.disc;
+
+  const flapPx = inchesToPx(FLAP_IN);
+  const panelPx = inchesToPx(panelIn);
+  const discPx = inchesToPx(discIn);
+  const gapPx = inchesToPx(GAP_IN);
+
+  const jacketW = panelPx * 2;
+  const jacketH = panelPx + flapPx * 2;
+
+  const canvasW = jacketW + gapPx + discPx + gapPx + discPx;
+  const canvasH = Math.max(jacketH, discPx);
+
+  const backR  = { x: 0, y: flapPx, w: panelPx, h: panelPx };
+  const frontR = { x: panelPx, y: flapPx, w: panelPx, h: panelPx };
+
+  const discY = Math.round((jacketH - discPx) / 2);
+  const disc1R = { x: jacketW + gapPx, y: discY, size: discPx };
+  const disc2R = { x: jacketW + gapPx + discPx + gapPx, y: discY, size: discPx };
+
+  return {
+    scaleKey,
+    panelIn,
+    discIn,
+    flapPx,
+    panelPx,
+    discPx,
+    gapPx,
+    jacketW,
+    jacketH,
+    canvasW,
+    canvasH,
+    backR,
+    frontR,
+    disc1R,
+    disc2R
+  };
+}
+
 function fillRoundedRectOn(tctx, x, y, w, h, r){
-  const {tl=0,tr=0,br=0,bl=0} = r || {};
+  const { tl = 0, tr = 0, br = 0, bl = 0 } = r || {};
   tctx.beginPath();
   tctx.moveTo(x + tl, y);
   tctx.lineTo(x + w - tr, y);
@@ -305,17 +341,23 @@ function fillRoundedRectOn(tctx, x, y, w, h, r){
   tctx.closePath();
   tctx.fill();
 }
-function drawPanelOn(tctx, img, key, x, y, w, h, scaleFactor = 1){
+
+function drawPanelOn(tctx, img, key, xBase, yBase, wBase, hBase, scaleFactor = 1){
   const s = state[key];
 
   if (img) {
-    const baseScale = computeBaseScale(img, w, h);
+    const baseScale = computeBaseScale(img, wBase, hBase);
     const W = img.naturalWidth * baseScale * s.zoom * scaleFactor;
     const H = img.naturalHeight * baseScale * s.zoom * scaleFactor;
 
+    const x = xBase * scaleFactor;
+    const y = yBase * scaleFactor;
+    const w = wBase * scaleFactor;
+    const h = hBase * scaleFactor;
+
     tctx.save();
     tctx.beginPath();
-    tctx.rect(x, y, w * scaleFactor, h * scaleFactor);
+    tctx.rect(x, y, w, h);
     tctx.clip();
     tctx.imageSmoothingEnabled = true;
     tctx.imageSmoothingQuality = 'high';
@@ -328,33 +370,42 @@ function drawPanelOn(tctx, img, key, x, y, w, h, scaleFactor = 1){
     );
     tctx.restore();
   } else {
+    const x = xBase * scaleFactor;
+    const y = yBase * scaleFactor;
+    const w = wBase * scaleFactor;
+    const h = hBase * scaleFactor;
+
     tctx.save();
     tctx.beginPath();
-    tctx.rect(x, y, w * scaleFactor, h * scaleFactor);
+    tctx.rect(x, y, w, h);
     tctx.clip();
     tctx.fillStyle = '#f7f7f7';
-    tctx.fillRect(x, y, w * scaleFactor, h * scaleFactor);
+    tctx.fillRect(x, y, w, h);
     tctx.fillStyle = '#9a9a9a';
-    tctx.font = `${Math.max(10, Math.floor((w * scaleFactor) / 12))}px sans-serif`;
+    tctx.font = `${Math.max(10, Math.floor(w / 12))}px sans-serif`;
     tctx.textAlign = 'center';
     tctx.textBaseline = 'middle';
-    tctx.fillText('Load image', x + (w * scaleFactor) / 2, y + (h * scaleFactor) / 2);
+    tctx.fillText('Load image', x + w / 2, y + h / 2);
     tctx.restore();
   }
 }
 
-function drawDiscOn(tctx, img, key, x, y, size, scaleFactor = 1){
+function drawDiscOn(tctx, img, key, xBase, yBase, sizeBase, scaleFactor = 1){
   const s = state[key];
 
   if (img) {
-    const baseScale = computeBaseScale(img, size, size);
+    const baseScale = computeBaseScale(img, sizeBase, sizeBase);
     const W = img.naturalWidth * baseScale * s.zoom * scaleFactor;
     const H = img.naturalHeight * baseScale * s.zoom * scaleFactor;
 
+    const x = xBase * scaleFactor;
+    const y = yBase * scaleFactor;
+    const size = sizeBase * scaleFactor;
+
     tctx.save();
-    const cx = x + (size * scaleFactor) / 2;
-    const cy = y + (size * scaleFactor) / 2;
-    const r = (size * scaleFactor) / 2;
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size / 2;
     tctx.beginPath();
     tctx.arc(cx, cy, r, 0, Math.PI * 2);
     tctx.closePath();
@@ -370,18 +421,22 @@ function drawDiscOn(tctx, img, key, x, y, size, scaleFactor = 1){
     );
     tctx.restore();
   } else {
+    const x = xBase * scaleFactor;
+    const y = yBase * scaleFactor;
+    const size = sizeBase * scaleFactor;
+
     tctx.save();
-    const cx = x + (size * scaleFactor) / 2;
-    const cy = y + (size * scaleFactor) / 2;
-    const r = (size * scaleFactor) / 2;
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const r = size / 2;
     tctx.beginPath();
     tctx.arc(cx, cy, r, 0, Math.PI * 2);
     tctx.closePath();
     tctx.clip();
     tctx.fillStyle = '#f7f7f7';
-    tctx.fillRect(x, y, size * scaleFactor, size * scaleFactor);
+    tctx.fillRect(x, y, size, size);
     tctx.fillStyle = '#9a9a9a';
-    tctx.font = `${Math.max(10, Math.floor((size * scaleFactor) / 12))}px sans-serif`;
+    tctx.font = `${Math.max(10, Math.floor(size / 12))}px sans-serif`;
     tctx.textAlign = 'center';
     tctx.textBaseline = 'middle';
     tctx.fillText('Load image', cx, cy);
@@ -394,27 +449,8 @@ function paintComposite(tctx, geom, scaleFactor = 1){
 
   tctx.clearRect(0, 0, tctx.canvas.width, tctx.canvas.height);
 
-  drawPanelOn(
-    tctx,
-    backImg,
-    'back',
-    backR.x * scaleFactor,
-    backR.y * scaleFactor,
-    backR.w,
-    backR.h,
-    scaleFactor
-  );
-
-  drawPanelOn(
-    tctx,
-    frontImg,
-    'front',
-    frontR.x * scaleFactor,
-    frontR.y * scaleFactor,
-    frontR.w,
-    frontR.h,
-    scaleFactor
-  );
+  drawPanelOn(tctx, backImg,  'back',  backR.x,  backR.y,  backR.w,  backR.h,  scaleFactor);
+  drawPanelOn(tctx, frontImg, 'front', frontR.x, frontR.y, frontR.w, frontR.h, scaleFactor);
 
   tctx.fillStyle = '#000';
   const rPx = Math.min(inchesToPx(FLAP_RADIUS_IN), Math.floor(flapPx / 2) - 1) * scaleFactor;
@@ -437,109 +473,25 @@ function paintComposite(tctx, geom, scaleFactor = 1){
     { tl: 0, tr: 0, br: rPx, bl: rPx }
   );
 
-  drawDiscOn(
-    tctx,
-    discImg,
-    'record',
-    disc1R.x * scaleFactor,
-    disc1R.y * scaleFactor,
-    disc1R.size,
-    scaleFactor
-  );
-
-  drawDiscOn(
-    tctx,
-    discImg,
-    'record',
-    disc2R.x * scaleFactor,
-    disc2R.y * scaleFactor,
-    disc2R.size,
-    scaleFactor
-  );
+  drawDiscOn(tctx, discImg, 'record', disc1R.x, disc1R.y, disc1R.size, scaleFactor);
+  drawDiscOn(tctx, discImg, 'record', disc2R.x, disc2R.y, disc2R.size, scaleFactor);
 }
 
-function drawDiscOn(tctx, img, key, x, y, size, scaleFactor=1){
-  const s = state[key];
-  if (img) {
-    const baseScale = computeBaseScale(img, size, size) * scaleFactor;
-    const W = img.naturalWidth * baseScale * s.zoom;
-    const H = img.naturalHeight * baseScale * s.zoom;
-    tctx.save();
-    const cx = x + (size * scaleFactor) / 2;
-    const cy = y + (size * scaleFactor) / 2;
-    const r = (size * scaleFactor) / 2;
-    tctx.beginPath();
-    tctx.arc(cx, cy, r, 0, Math.PI * 2);
-    tctx.closePath();
-    tctx.clip();
-    tctx.imageSmoothingEnabled = true;
-    tctx.imageSmoothingQuality = 'high';
-    tctx.drawImage(
-      img,
-      x + (s.tx * scaleFactor),
-      y + (s.ty * scaleFactor),
-      W,
-      H
-    );
-    tctx.restore();
-  } else {
-    tctx.save();
-    const cx = x + (size * scaleFactor) / 2;
-    const cy = y + (size * scaleFactor) / 2;
-    const r = (size * scaleFactor) / 2;
-    tctx.beginPath();
-    tctx.arc(cx, cy, r, 0, Math.PI * 2);
-    tctx.closePath();
-    tctx.clip();
-    tctx.fillStyle = '#f7f7f7';
-    tctx.fillRect(x, y, size * scaleFactor, size * scaleFactor);
-    tctx.fillStyle = '#9a9a9a';
-    tctx.font = `${Math.max(10, Math.floor((size * scaleFactor) / 12))}px sans-serif`;
-    tctx.textAlign = 'center';
-    tctx.fillText('Load image', cx, cy);
-    tctx.restore();
-  }
-}
-
-function getGeometry(){
-  const panelIn = parseFloat(UI.panelPreset.value) || BASE_PANEL_IN;
-  const flapPx  = inchesToPx(FLAP_IN);
-  const panelPx = inchesToPx(panelIn);
-  const jacketW = panelPx * 2;
-  const jacketH = panelPx + flapPx * 2;
-
-  const discIn  = panelIn * DISC_RATIO;
-  const discPx  = inchesToPx(discIn);
-  const gapPx   = inchesToPx(GAP_IN);
-
-  const canvasW = jacketW + gapPx + discPx + gapPx + discPx;
-  const canvasH = Math.max(jacketH, discPx);
-
-  const backR  = {x:0, y:flapPx, w:panelPx, h:panelPx};
-  const frontR = {x:panelPx, y:flapPx, w:panelPx, h:panelPx};
-
-  const discY = Math.round((jacketH - discPx) / 2);
-  const disc1R = {x:jacketW + gapPx, y:discY, size:discPx};
-  const disc2R = {x:jacketW + gapPx + discPx + gapPx, y:discY, size:discPx};
-
-  return { panelIn, flapPx, panelPx, jacketW, jacketH, discIn, discPx, gapPx, canvasW, canvasH, backR, frontR, disc1R, disc2R };
-}
-
-
-/* ----- render preview ----- */
-function render(reset=false){
+function render(reset = false){
   const geom = getGeometry();
 
   cv.width = geom.canvasW;
   cv.height = geom.canvasH;
 
-  const basePanelPx = inchesToPx(BASE_PANEL_IN);
-  const baseDiscPx  = inchesToPx(BASE_PANEL_IN * DISC_RATIO);
-  const baseGapPx   = inchesToPx(GAP_IN);
+  const basePanelPx = inchesToPx(2.00);
+  const baseDiscPx = inchesToPx(1.85);
+  const baseGapPx = inchesToPx(GAP_IN);
   const baseCompositeW = basePanelPx * 2 + baseGapPx + baseDiscPx + baseGapPx + baseDiscPx;
+
   const desiredW = BASE_PREVIEW_W * (geom.canvasW / baseCompositeW);
   const maxW = wrap.clientWidth;
   const cssW = Math.min(desiredW, maxW);
+
   cv.style.width = cssW + 'px';
   cv.style.height = 'auto';
   legend.style.width = cssW + 'px';
@@ -556,8 +508,12 @@ function render(reset=false){
 
   paintComposite(ctx, geom, 1);
 
+  const coverWIn = (geom.panelIn * 2) + (BLEED_IN * 2);
+  const coverHIn = geom.panelIn + (FLAP_IN * 2) + (BLEED_IN * 2);
+  const recordIn = geom.discIn + (BLEED_IN * 2);
+
   UI.sizeReadout.textContent =
-    `Base canvas: ${pxToIn(geom.canvasW).toFixed(3)}" × ${pxToIn(geom.canvasH).toFixed(3)}" @ ${DPI} DPI • Export oversample: ${EXPORT_SCALE}× • Panel: ${geom.panelIn.toFixed(3)}" • Disc: ${geom.discIn.toFixed(3)}" ×2`;
+    `Leonardo size — Cover: ${coverWIn.toFixed(2)}" × ${coverHIn.toFixed(2)}" • Record: ${recordIn.toFixed(2)}" × ${recordIn.toFixed(2)}" • Scale: ${geom.scaleKey} • Bleed: ${BLEED_IN.toFixed(2)}"`;
 
   UI.editingLabel.textContent =
     UI.editTarget.value === 'back' ? 'Jacket — Back' :
@@ -572,11 +528,10 @@ function drawFrameOnly(){
   paintComposite(ctx, g, 1);
 }
 
-/* ----- hit testing ----- */
 function canvasPoint(ev){
   const r = cv.getBoundingClientRect();
   const s = cv.width / r.width;
-  return { x:(ev.clientX-r.left)*s, y:(ev.clientY-r.top)*s };
+  return { x: (ev.clientX - r.left) * s, y: (ev.clientY - r.top) * s };
 }
 
 function pickTarget(pt){
@@ -598,7 +553,6 @@ function pickTarget(pt){
   return null;
 }
 
-/* ----- interactions ----- */
 cv.addEventListener('mousedown', ev => {
   const pt = canvasPoint(ev);
   const hit = pickTarget(pt);
@@ -608,12 +562,12 @@ cv.addEventListener('mousedown', ev => {
     const img = hit === 'back' ? backImg : hit === 'front' ? frontImg : discImg;
     if (img) {
       dragging = {
-        active:true,
-        target:hit,
-        startX:pt.x,
-        startY:pt.y,
-        startTx:state[hit].tx,
-        startTy:state[hit].ty
+        active: true,
+        target: hit,
+        startX: pt.x,
+        startY: pt.y,
+        startTx: state[hit].tx,
+        startTy: state[hit].ty
       };
     }
   }
@@ -623,6 +577,7 @@ window.addEventListener('mouseup', () => dragging.active = false);
 
 cv.addEventListener('mousemove', ev => {
   if (!dragging.active) return;
+
   const pt = canvasPoint(ev);
   const k = dragging.target;
   const s = state[k];
@@ -633,6 +588,7 @@ cv.addEventListener('mousemove', ev => {
   const img = k === 'back' ? backImg : k === 'front' ? frontImg : discImg;
   const w = k === 'record' ? g.disc1R.size : g.backR.w;
   const h = k === 'record' ? g.disc1R.size : g.backR.h;
+
   clampTransform(k, img, w, h);
   drawFrameOnly();
 });
@@ -662,16 +618,19 @@ cv.addEventListener('wheel', ev => {
 
   const oldW = img.naturalWidth * s.baseScale * s.zoom;
   const oldH = img.naturalHeight * s.baseScale * s.zoom;
+
   s.zoom = zq;
+
   const newW = img.naturalWidth * s.baseScale * s.zoom;
   const newH = img.naturalHeight * s.baseScale * s.zoom;
+
   s.tx -= (newW - oldW) / 2;
   s.ty -= (newH - oldH) / 2;
-  clampTransform(hit, img, w, h);
 
+  clampTransform(hit, img, w, h);
   UI.zoomSlider.value = (s.zoom * 100).toFixed(1);
   drawFrameOnly();
-}, { passive:false });
+}, { passive: false });
 
 UI.zoomSlider.addEventListener('input', () => {
   const k = UI.editTarget.value;
@@ -690,8 +649,10 @@ UI.zoomSlider.addEventListener('input', () => {
 
   const newW = img ? img.naturalWidth * s.baseScale * s.zoom : 0;
   const newH = img ? img.naturalHeight * s.baseScale * s.zoom : 0;
+
   s.tx -= (newW - oldW) / 2;
   s.ty -= (newH - oldH) / 2;
+
   if (img) clampTransform(k, img, w, h);
 
   UI.zoomSlider.value = (s.zoom * 100).toFixed(1);
@@ -705,7 +666,7 @@ UI.editTarget.addEventListener('change', () => {
   UI.zoomSlider.value = (state[UI.editTarget.value].zoom * 100).toFixed(1);
 });
 
-UI.panelPreset.addEventListener('change', () => {
+UI.scalePreset.addEventListener('change', () => {
   state.back.inited = false;
   state.front.inited = false;
   state.record.inited = false;
@@ -720,7 +681,13 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   render();
 });
 
-/* ----- export helpers ----- */
+function makeOffscreenCanvas(w, h){
+  const off = document.createElement('canvas');
+  off.width = w;
+  off.height = h;
+  return off;
+}
+
 function injectPngPhys(blob, dpiValue){
   return blob.arrayBuffer().then(buf => {
     const bytes = new Uint8Array(buf);
@@ -777,36 +744,127 @@ function injectPngPhys(blob, dpiValue){
       out.set(bytes.slice(ihEnd), ihEnd + ph.length);
     }
 
-    return new Blob([out], { type:'image/png' });
+    return new Blob([out], { type: 'image/png' });
   });
 }
 
-/* ----- offscreen hi-res export ----- */
-function exportPNG(){
-  const geom = getGeometry();
-
-  const off = document.createElement('canvas');
-  off.width = geom.canvasW * EXPORT_SCALE;
-  off.height = geom.canvasH * EXPORT_SCALE;
-
-  const offCtx = off.getContext('2d', { alpha:true });
-  paintComposite(offCtx, geom, EXPORT_SCALE);
-
-  off.toBlob(async blob => {
+function exportBlobWithDPI(canvas, dpiValue, filename){
+  canvas.toBlob(async blob => {
     if (!blob) return;
-    const finalBlob = await injectPngPhys(blob, DPI * EXPORT_SCALE);
+    const finalBlob = await injectPngPhys(blob, dpiValue);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(finalBlob);
-    a.download = `mini_lp_combo_hires_x${EXPORT_SCALE}.png`;
+    a.download = filename;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }, 'image/png');
 }
 
-document.getElementById('exportPNG').addEventListener('click', exportPNG);
+function exportCoverPNG(){
+  const g = getGeometry();
+
+  const coverWIn = (g.panelIn * 2) + (BLEED_IN * 2);
+  const coverHIn = g.panelIn + (FLAP_IN * 2) + (BLEED_IN * 2);
+
+  const coverWBase = inchesToPx(coverWIn);
+  const coverHBase = inchesToPx(coverHIn);
+  const bleedBase = inchesToPx(BLEED_IN);
+
+  const off = makeOffscreenCanvas(coverWBase * EXPORT_SCALE, coverHBase * EXPORT_SCALE);
+  const octx = off.getContext('2d', { alpha: true });
+  octx.clearRect(0, 0, off.width, off.height);
+
+  drawPanelOn(octx, backImg,  'back',  bleedBase, bleedBase + g.flapPx, g.panelPx, g.panelPx, EXPORT_SCALE);
+  drawPanelOn(octx, frontImg, 'front', bleedBase + g.panelPx, bleedBase + g.flapPx, g.panelPx, g.panelPx, EXPORT_SCALE);
+
+  octx.fillStyle = '#000';
+  const rPx = Math.min(inchesToPx(FLAP_RADIUS_IN), Math.floor(g.flapPx / 2) - 1) * EXPORT_SCALE;
+
+  fillRoundedRectOn(
+    octx,
+    bleedBase * EXPORT_SCALE,
+    bleedBase * EXPORT_SCALE,
+    g.panelPx * EXPORT_SCALE,
+    g.flapPx * EXPORT_SCALE,
+    { tl: rPx, tr: rPx, br: 0, bl: 0 }
+  );
+
+  fillRoundedRectOn(
+    octx,
+    bleedBase * EXPORT_SCALE,
+    (bleedBase + g.flapPx + g.panelPx) * EXPORT_SCALE,
+    g.panelPx * EXPORT_SCALE,
+    g.flapPx * EXPORT_SCALE,
+    { tl: 0, tr: 0, br: rPx, bl: rPx }
+  );
+
+  const filename = `cover_${g.scaleKey}_${coverWIn.toFixed(2)}x${coverHIn.toFixed(2)}in.png`;
+  exportBlobWithDPI(off, DPI * EXPORT_SCALE, filename);
+}
+
+function exportRecordPNG(){
+  const g = getGeometry();
+
+  const recordIn = g.discIn + (BLEED_IN * 2);
+  const recordBase = inchesToPx(recordIn);
+  const bleedBase = inchesToPx(BLEED_IN);
+
+  const off = makeOffscreenCanvas(recordBase * EXPORT_SCALE, recordBase * EXPORT_SCALE);
+  const octx = off.getContext('2d', { alpha: true });
+  octx.clearRect(0, 0, off.width, off.height);
+
+  const discSize = g.discPx * EXPORT_SCALE;
+  const bleed = bleedBase * EXPORT_SCALE;
+  const cx = off.width / 2;
+  const cy = off.height / 2;
+  const r = discSize / 2;
+
+  const s = state.record;
+
+  if (discImg) {
+    const baseScale = computeBaseScale(discImg, g.discPx, g.discPx);
+    const W = discImg.naturalWidth * baseScale * s.zoom * EXPORT_SCALE;
+    const H = discImg.naturalHeight * baseScale * s.zoom * EXPORT_SCALE;
+
+    octx.save();
+    octx.beginPath();
+    octx.arc(cx, cy, r, 0, Math.PI * 2);
+    octx.closePath();
+    octx.clip();
+    octx.imageSmoothingEnabled = true;
+    octx.imageSmoothingQuality = 'high';
+    octx.drawImage(
+      discImg,
+      bleed + (s.tx * EXPORT_SCALE),
+      bleed + (s.ty * EXPORT_SCALE),
+      W,
+      H
+    );
+    octx.restore();
+  } else {
+    octx.save();
+    octx.beginPath();
+    octx.arc(cx, cy, r, 0, Math.PI * 2);
+    octx.closePath();
+    octx.clip();
+    octx.fillStyle = '#f7f7f7';
+    octx.fillRect(0, 0, off.width, off.height);
+    octx.fillStyle = '#9a9a9a';
+    octx.font = `${Math.max(10, Math.floor(discSize / 12))}px sans-serif`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillText('Load image', cx, cy);
+    octx.restore();
+  }
+
+  const filename = `record_${g.scaleKey}_${recordIn.toFixed(2)}x${recordIn.toFixed(2)}in.png`;
+  exportBlobWithDPI(off, DPI * EXPORT_SCALE, filename);
+}
+
+document.getElementById('exportCover').addEventListener('click', exportCoverPNG);
+document.getElementById('exportRecord').addEventListener('click', exportRecordPNG);
 
 window.addEventListener('resize', () => render());
-
 render();
 </script>
 </body>
