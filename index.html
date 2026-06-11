@@ -615,10 +615,14 @@ function setupFunkoChecklist() {
     });
   });
 
-  loadBtn.addEventListener("click", () => {
+  function loadOwnedFromInput() {
     const lines = inputBox.value.split("\n").map(l => l.trim()).filter(l => l);
     applyOwned(lines);
-  });
+  }
+
+  loadBtn.addEventListener("click", loadOwnedFromInput);
+
+  inputBox.addEventListener("input", loadOwnedFromInput);
 
   downloadBtn.addEventListener("click", () => {
     const text = outputBox.value;
