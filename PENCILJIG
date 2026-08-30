@@ -53,6 +53,7 @@
   .out{font-size:18px;letter-spacing:.08em;display:flex;flex-wrap:wrap;gap:6px; font-family:var(--face);}
   .piece{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:6px 8px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;font-weight:700;font-family:var(--face)}
   .piece img{height:22px;width:auto;display:block}
+  .out.mirror-vertical .piece{transform:scaleX(-1)}
   .bad{border-color:#c62828!important;color:#c62828!important}
 
   /* Letters + Emojis combined section */
@@ -107,6 +108,7 @@
     <div class="row" style="margin-top:8px">
       <label class="pill"><input type="checkbox" id="forceCaps"> Force UPPERCASE</label>
       <label class="pill"><input type="checkbox" id="ignoreUnsupported" checked> Ignore unsupported characters</label>
+      <label class="pill"><input type="checkbox" id="mirrorVertical"> Vertical mirror</label>
 
       <!-- Font selector -->
       <label class="pill" style="display:flex;align-items:center;gap:8px;background:#fff">
@@ -225,6 +227,7 @@ function renderEmojiGrid(){
 const $phrase=document.getElementById('phrase');
 const $forceCaps=document.getElementById('forceCaps');
 const $ignore=document.getElementById('ignoreUnsupported');
+const $mirrorVertical=document.getElementById('mirrorVertical');
 function insertToken(tok){
   const el=$phrase, start=el.selectionStart??el.value.length, end=el.selectionEnd??el.value.length;
   el.value = el.value.slice(0,start) + (start && el.value[start-1]!==' ' ? ' ' : '') + tok + (end<el.value.length && el.value[end]!==' ' ? ' ' : '') + el.value.slice(end);
@@ -268,6 +271,8 @@ function update(){
   // Normal (left→right) and Reversed (right→left)
   buildPieces($outNormal, toks, need);
   buildPieces($outReversed, [...toks].reverse(), need);
+  $outNormal.classList.toggle('mirror-vertical', $mirrorVertical.checked);
+  $outReversed.classList.toggle('mirror-vertical', $mirrorVertical.checked);
 
   // Update letter counts
   for(const k in BASE_INV){
@@ -299,6 +304,7 @@ renderEmojiGrid();
 update();
 document.getElementById('forceCaps').addEventListener('change',update);
 document.getElementById('ignoreUnsupported').addEventListener('change',update);
+document.getElementById('mirrorVertical').addEventListener('change',update);
 document.getElementById('phrase').addEventListener('input',update);
 </script>
 </body>
