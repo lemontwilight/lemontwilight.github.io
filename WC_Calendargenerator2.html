@@ -118,8 +118,80 @@
       text-transform: uppercase;
     }
 
+    /* Keep each label/control pair together without changing vertical spacing */
+    .compact-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    /* Prevent the original negative checkbox margin from overlapping labels */
+    .compact-control input[type="checkbox"] {
+      margin: 0 4px 0 0;
+      padding: 0;
+    }
+
+
+    /* Tighter left/right spacing only for the two settings rows */
+    .appearance-settings-row {
+      column-gap: 10px;
+    }
+
+    .top-settings-row {
+      column-gap: 10px;
+      align-items: center;
+    }
+
+    .top-settings-row .compact-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      margin-top: 15px;
+    }
+
+    .top-settings-row .compact-control label,
+    .top-settings-row .compact-control input {
+      margin-top: 0;
+    }
+
+    .top-settings-row .update-button {
+      margin-top: 15px;
+      align-self: center;
+    }
+    /* Keep all appearance controls on one line when there is room */
+    .appearance-settings-row {
+      flex-wrap: nowrap;
+    }
+
+    .update-button {
+      background: #619ca3;
+      color: white;
+      border: 1px solid #4f858b;
+      border-radius: 6px;
+      padding: 6px 16px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+
+    .update-button:hover {
+      background: #527f85;
+    }
+
     .no-print {
       display: block;
+    }
+
+    /* More breathing room between the settings and calendar preview */
+    @media screen {
+      #calendar-title {
+        margin-top: 42px;
+      }
     }
 
     /* === LANDSCAPE TOGGLE === */
@@ -149,10 +221,22 @@
       margin: 0 auto;
     }
 
+    body.landscape-mode #calendar-wrapper {
+      width: 10in;
+      max-width: calc(100vw - 40px);
+      transform-origin: top center;
+    }
+
     body.landscape-mode table.calendar {
-      width: 95vw;
-      height: 60vw;
+      width: 10in;
+      height: auto;
       max-width: none;
+    }
+
+    @media screen and (max-width: 1000px) {
+      body.landscape-mode #calendar-wrapper {
+        transform: scale(calc((100vw - 40px) / 960));
+      }
     }
 
     /* === TABLE HEADER CELLS MON TUES... === */
@@ -403,18 +487,33 @@ table.calendar {
     </select>
 
     <!-- === FIRST FLEX ROW (Layout Options) === -->
-    <div class="controls-row" style="margin:-7px;">
-      <label for="header-color">Header Color</label>
-      <input type="color" id="header-color" value="#619ca3">
+    <div class="controls-row top-settings-row" style="margin:-7px;">
+      <span class="compact-control">
+        <label for="header-color">Header Color</label>
+        <input type="color" id="header-color" value="#619ca3">
+      </span>
 
-      <input type="checkbox" id="header-text-white">
-      <label for="header-text-white">White Header Text</label>
+      <span class="compact-control">
+        <label for="blank-color">Blank Day Color</label>
+        <input type="color" id="blank-color" value="#cfe5e7" title="Blank Day Color">
+      </span>
 
-      <input type="checkbox" id="show-year" checked>
-      <label for="show-year">Show Year</label>
+      <span class="compact-control">
+        <input type="checkbox" id="header-text-white">
+        <label for="header-text-white">White Header Text</label>
+      </span>
 
-      <input type="checkbox" id="landscape-switch">
-      <label for="landscape-switch">Landscape Layout</label>
+      <span class="compact-control">
+        <input type="checkbox" id="show-year" checked>
+        <label for="show-year">Show Year</label>
+      </span>
+
+      <span class="compact-control">
+        <input type="checkbox" id="landscape-switch">
+        <label for="landscape-switch">Landscape Layout</label>
+      </span>
+
+      <button type="button" id="update-button" class="update-button">Update</button>
     </div>
 <div style="margin:20px; color: #fdd310;">
 <p></p>
@@ -431,10 +530,11 @@ table.calendar {
 
 
     <!-- === SECOND FLEX ROW (Font + Colors) === -->
-    <div class="controls-row" style="margin-top: -15px;">
+    <div class="controls-row appearance-settings-row" style="margin-top: -15px;">
 
-      <label for="font-select">Font</label>
-      <div class="font-dropdown no-print" id="fontDropdown">
+      <span class="compact-control">
+        <label for="font-select">Font</label>
+        <div class="font-dropdown no-print" id="fontDropdown">
         <div class="selected" id="selectedFont" data-value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">
           Times New Roman
         </div>
@@ -464,9 +564,11 @@ table.calendar {
 
         </div>
       </div>
+      </span>
       <!-- Hidden fallback input that your calendar JS reads -->
       <input type="hidden" id="font-select" value="'Times New Roman', serif">
 
+      <span class="compact-control">
       <label for="event-size">Event Size</label>
       <select id="event-size">
         <option value="8pt">8 pt</option>
@@ -481,8 +583,10 @@ table.calendar {
         <option value="17pt">17 pt</option>
         <option value="18pt">18 pt</option>
       </select>
+      </span>
 
       <!-- NEW: separate number size control -->
+      <span class="compact-control">
       <label for="number-size">Number Size</label>
       <select id="number-size">
         <option value="8pt" selected>8 pt</option>
@@ -497,12 +601,17 @@ table.calendar {
         <option value="17pt">17 pt</option>
         <option value="18pt">18 pt</option>
       </select>
+      </span>
 
-      <label for="number-color">Number Color</label>
-      <input type="color" id="number-color" value="#000000">
+      <span class="compact-control">
+        <label for="number-color">Number Color</label>
+        <input type="color" id="number-color" value="#000000">
+      </span>
 
-      <label for="event-color">Event Color</label>
-      <input type="color" id="event-color" value="#000000">
+      <span class="compact-control">
+        <label for="event-color">Event Color</label>
+        <input type="color" id="event-color" value="#000000">
+      </span>
     </div>
   </div>
 
@@ -578,6 +687,9 @@ Each Line is an Event:
   const numberSizeInput = document.getElementById("number-size"); // NEW
   const eventColorInput = document.getElementById("event-color");
   const numberColorInput = document.getElementById("number-color");
+  const blankColorInput = document.getElementById("blank-color");
+  let blankColorWasChosen = false;
+  const updateButton = document.getElementById("update-button");
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -691,7 +803,9 @@ Each Line is an Event:
       rows.pop();
     }
 
-    const lightColor = lightenColor(headerColorInput.value, 35);
+    const lightColor = blankColorWasChosen
+      ? blankColorInput.value
+      : lightenColor(headerColorInput.value, 35);
     const eventSize = eventSizeInput.value;
     const eventColor = eventColorInput.value;
     const numberColor = numberColorInput.value;
@@ -722,6 +836,57 @@ Each Line is an Event:
 
   function updateCalendar() {
     renderCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value));
+  }
+
+  function applyAppearanceSettings() {
+    const fontFamily = fontSelect.value;
+    const eventSize = eventSizeInput.value;
+    const eventColor = eventColorInput.value;
+    const numberColor = numberColorInput.value;
+    const numberSize = numberSizeInput.value;
+    const blankColor = blankColorWasChosen
+      ? blankColorInput.value
+      : lightenColor(headerColorInput.value, 35);
+
+    const month = parseInt(monthSelect.value);
+    const year = parseInt(yearSelect.value);
+    const monthName = monthNames[month];
+
+    calendarTitle.textContent = showYearToggle.checked ? `${monthName} ${year}` : monthName;
+    calendarTitle.style.fontFamily = fontFamily;
+    updatePageMargin(fontFamily);
+    updateHeaderCase(fontFamily);
+
+    document.querySelectorAll("table.calendar th").forEach(th => {
+      th.style.backgroundColor = headerColorInput.value;
+      th.style.color = headerTextWhiteToggle.checked ? "#fff" : "#000";
+      th.style.fontFamily = fontFamily;
+    });
+
+    document.querySelectorAll("td.top-blank").forEach(td => {
+      td.style.backgroundColor = blankColor;
+    });
+
+    document.querySelectorAll(".square-cell").forEach(cell => {
+      cell.style.fontFamily = fontFamily;
+    });
+
+    document.querySelectorAll(".day-label").forEach(label => {
+      label.style.color = numberColor;
+      label.style.fontSize = numberSize;
+      label.style.fontFamily = fontFamily;
+
+      const holiday = label.querySelector(".holiday-text");
+      if (holiday) {
+        holiday.style.fontSize = (parseInt(numberSize, 10) - 3) + "pt";
+      }
+    });
+
+    document.querySelectorAll(".note-area").forEach(note => {
+      note.style.fontSize = eventSize;
+      note.style.color = eventColor;
+      note.style.fontFamily = fontFamily;
+    });
   }
 
   function applyBulkNotes() {
@@ -854,20 +1019,25 @@ Each Line is an Event:
   // Event listeners
   monthSelect.addEventListener("change", updateCalendar);
   yearSelect.addEventListener("change", updateCalendar);
-  headerColorInput.addEventListener("input", updateCalendar);
-  headerTextWhiteToggle.addEventListener("change", updateCalendar);
-  showYearToggle.addEventListener("change", updateCalendar);
   startWeekSelect.addEventListener("change", updateCalendar);
-  fontSelect.addEventListener("change", updateCalendar);
-  eventSizeInput.addEventListener("change", updateCalendar);
-  if (numberSizeInput) {
-    numberSizeInput.addEventListener("change", updateCalendar); // NEW
-  }
-  eventColorInput.addEventListener("input", updateCalendar);
-  numberColorInput.addEventListener("input", updateCalendar);
+
+  headerColorInput.addEventListener("input", applyAppearanceSettings);
+  headerTextWhiteToggle.addEventListener("change", applyAppearanceSettings);
+  showYearToggle.addEventListener("change", applyAppearanceSettings);
+  fontSelect.addEventListener("change", applyAppearanceSettings);
+  eventSizeInput.addEventListener("change", applyAppearanceSettings);
+  numberSizeInput.addEventListener("change", applyAppearanceSettings);
+  eventColorInput.addEventListener("input", applyAppearanceSettings);
+  numberColorInput.addEventListener("input", applyAppearanceSettings);
+  blankColorInput.addEventListener("input", () => {
+    blankColorWasChosen = true;
+    applyAppearanceSettings();
+  });
+  updateButton.addEventListener("click", applyBulkNotes);
+
   landscapeSwitch.addEventListener("change", () => {
     document.body.classList.toggle("landscape-mode", landscapeSwitch.checked);
-    updateCalendar(); // re-render for layout change
+    applyAppearanceSettings();
   });
 
   updateCalendar();
@@ -896,7 +1066,7 @@ Each Line is an Event:
       selectedFont.setAttribute("data-value", fontValue);
       fontSelect.value = fontValue;
       fontOptions.style.display = "none";
-      updateCalendar();
+      applyAppearanceSettings();
     });
   });
 </script>
